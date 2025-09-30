@@ -1,0 +1,36 @@
+turnoSchema (models/turno.js)
+
+precioTotal: { type: Number, required: true },
+
+
+Pero en crearTurno (turnosController.js) vos calculás:
+
+let precioTotal = tipo.precioBase;
+
+
+Está bien, pero ⚠️ si tipoTurno no existe o tipo.precioBase es undefined, Mongoose va a romper porque precioTotal es required.
+→ Necesitás manejar el caso de !tipo.
+
+
+--------------------------------------------------
+
+Render de calendario (pagesControllers.js)
+
+export const calendario = (req, res) => {
+  res.render("calendario");
+};
+
+
+El archivo que mostraste (views/calendario.ejs) tiene HTML completo (<!DOCTYPE html> ...).
+EJS espera que sea un template, no HTML plano. Si lo dejás así, se va a renderizar igual pero no podrás reutilizar layouts (no es un error fatal, pero es inconsistente con EJS).
+
+/////////////////////////////////////////////////////
+
+Controlador de turnos (crearTurno)
+
+const turnoExistente = await Turno.findOne({ peluquero, fechaHora, estado: "pendiente" });
+
+
+Si peluquero no lo mandás en el body (y en tu form no lo mandás), siempre va a quedar undefined → esto puede causar que la validación de disponibilidad no funcione.
+
+
