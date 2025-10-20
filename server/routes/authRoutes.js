@@ -5,6 +5,6 @@ const router = express.Router();
 
 router.post("/login", login);
 router.post("/logout", logout);
-router.get("/check", verificarSesion);
+router.get("/check", verificarSesion); 
 
 export default router;

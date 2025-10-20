@@ -6,9 +6,7 @@ import { conectarDB } from "./config/db.js";
 
 import turnosRoutes from "./routes/turnos.js";
 import clientesRoutes from "./routes/clientes.js";
-import peluquerosRoutes from "./routes/peluqueros.js";
 import tipoTurnoRoutes from "./routes/tiposTurno.js";
-import productosRoutes from "./routes/productos.js";
 import usuariosRoutes from "./routes/usuarios.js";
 import authRoutes from "./routes/authRoutes.js";
 
@@ -38,9 +36,7 @@ app.use(session({
 
 app.use("/api/turnos", turnosRoutes);
 app.use("/api/clientes", clientesRoutes);
-app.use("/api/peluqueros", peluquerosRoutes);
 app.use("/api/tiposTurno", tipoTurnoRoutes);
-app.use("/api/productos", productosRoutes);
 app.use("/api/usuarios", usuariosRoutes);
 app.use("/api/auth", authRoutes);
 

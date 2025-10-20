@@ -1,5 +1,5 @@
 export const login = async (email, password) => {
-  const res = await fetch("/api/auth/login", {
+  const res = await fetch("api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -15,10 +15,10 @@ export const login = async (email, password) => {
 };
 
 export const logout = async () => {
-  await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+  await fetch("api/auth/logout", { method: "POST", credentials: "include" });
 };
 
 export const checkSesion = async () => {
-  const res = await fetch("/api/auth/check", { credentials: "include" });
+  const res = await fetch("api/auth/check", { credentials: "include" });
   return res.json();
 };

@@ -1,48 +1,27 @@
-import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
 import Login from "../pages/Login.jsx";
 import PanelAdmin from "../pages/PanelAdmin.jsx";
-import CalendarioPage from "../pages/CalendarioPage.jsx";
-import { checkSesion } from "../services/authService.js";
+import TurnosPage from "../pages/TurnosPage.jsx";
 
 export default function AppRouter() {
-  const [autenticado, setAutenticado] = useState(null); // null = cargando
+  const { autenticado } = useAuth();
 
-  useEffect(() => {
-    // Verificar sesión al montar el router
-    checkSesion().then(data => setAutenticado(data.autenticado));
-  }, []);
-
-  if (autenticado === null) return <div>Cargando...</div>; // spinner opcional
+  if (autenticado === null) return <p>Cargando sesión...</p>;
 
   return (
     <BrowserRouter>
       <Routes>
-        {/* Calendar público */}
-        <Route path="/calendar" element={<CalendarioPage />} />
-
-        {/* Login */}
+        <Route path="/turnos" element={<TurnosPage />} />
         <Route
           path="/login"
-          element={
-            !autenticado ? (
-              <Login setAutenticado={setAutenticado} />
-            ) : (
-              <Navigate to="/panelAdmin" />
-            )
-          }
+          element={!autenticado ? <Login /> : <Navigate to="/panelAdmin" />}
         />
-
-        {/* Panel protegido */}
         <Route
           path="/panelAdmin"
-          element={
-            autenticado ? <PanelAdmin /> : <Navigate to="/login" />
-          }
+          element={autenticado ? <PanelAdmin /> : <Navigate to="/login" />}
         />
-
-        {/* Ruta por defecto */}
-        <Route path="*" element={<Navigate to="/calendar" />} />
+        <Route path="*" element={<Navigate to="/turnos" />} />
       </Routes>
     </BrowserRouter>
   );

@@ -9,7 +9,7 @@ const usuarioSchema = new mongoose.Schema({
   creadoEn: { type: Date, default: Date.now }
 });
 
-// Antes de guardar, encripta la contraseña si fue modificada
+// Middleware para hashear la contraseña antes de guardar, solo si fue modificada
 usuarioSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   try {
