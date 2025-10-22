@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { InputField } from "./InputField.jsx";
-import { SelectField } from "./SelectField.jsx";
-import { Button } from "./Button.jsx";
+import { InputField } from "../UI/InputField.jsx";
+import { SelectField } from "../UI/SelectField.jsx";
+import { Button } from "../UI/Button.jsx";
 
 export function FormTurno({ onCrearTurno }) {
-  const [datosCliente, setDatosCliente] = useState({ nombre: "", email: "", tipoTurno: "" });
+  const [datosCliente, setDatosCliente] = useState({ nombre: "", email: "", telefono: "", tipoTurno: "" });
   const [tiposTurno, setTiposTurno] = useState([]);
   const [fechaSeleccionada, setFechaSeleccionada] = useState("");
   const [horarioSeleccionado, setHorarioSeleccionado] = useState("");
@@ -23,9 +23,6 @@ export function FormTurno({ onCrearTurno }) {
           duracion: t.duracion || 0
         }));
         setTiposTurno(tiposFormateados);
-        if (data.length > 0) {
-          setDatosCliente(prev => ({ ...prev, tipoTurno: data[0]._id }));
-        }
       } catch (err) {
         console.error(err);
         setTiposTurno([]);
@@ -38,56 +35,54 @@ export function FormTurno({ onCrearTurno }) {
     setDatosCliente({ ...datosCliente, [e.target.name]: e.target.value });
   };
 
- // Traer horarios disponibles
-useEffect(() => {
-  if (!fechaSeleccionada) return;
+  // Traer horarios disponibles
+  useEffect(() => {
+    if (!fechaSeleccionada) return;
 
-  const year = Number(fechaSeleccionada.split("-")[0]);
-  if (year !== 2025 && year !== 2026) return;
+    const year = Number(fechaSeleccionada.split("-")[0]);
+    if (year !== 2025 && year !== 2026) return;
 
-  const fetchHorarios = async () => {
-    try {
-      const res = await fetch(`/api/turnos/horarios?fecha=${fechaSeleccionada}`);
-      if (!res.ok) throw new Error("Error al obtener horarios");
+    const fetchHorarios = async () => {
+      try {
+        const res = await fetch(`/api/turnos/horarios?fecha=${fechaSeleccionada}`);
+        if (!res.ok) throw new Error("Error al obtener horarios");
 
-      const data = await res.json();
-      const horariosArray = Array.isArray(data) ? data : data.horarios || [];
-      const horariosFormateados = horariosArray.map(h => ({ value: h, label: h }));
+        const data = await res.json();
+        const horariosArray = Array.isArray(data) ? data : data.horarios || [];
+        const horariosFormateados = horariosArray.map(h => ({ value: h, label: h }));
 
-      setHorariosDisponibles(horariosFormateados);
-      // no hace falta setHorarioSeleccionado("") acá
-    } catch (err) {
-      console.error(err);
-      setHorariosDisponibles([]);
+        setHorariosDisponibles(horariosFormateados);
+      } catch (err) {
+        console.error(err);
+        setHorariosDisponibles([]);
+      }
+    };
+
+    fetchHorarios();
+  }, [fechaSeleccionada]);
+
+  useEffect(() => {
+    if (horariosDisponibles.length > 0) {
+      setHorarioSeleccionado(horariosDisponibles[0].value);
+    } else {
+      setHorarioSeleccionado("");
     }
-  };
-
-  fetchHorarios();
-}, [fechaSeleccionada]);
-
-
-useEffect(() => {
-  if (horariosDisponibles.length > 0) {
-    setHorarioSeleccionado(horariosDisponibles[0].value);
-  } else {
-    setHorarioSeleccionado("");
-  }
-}, [horariosDisponibles]);
+  }, [horariosDisponibles]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!fechaSeleccionada || !horarioSeleccionado || !datosCliente.tipoTurno) {
-      console.log(fechaSeleccionada)
-      console.log(horarioSeleccionado)
-      console.log(datosCliente.tipoTurno)
+    if (!fechaSeleccionada || !horarioSeleccionado || !datosCliente.tipoTurno || !datosCliente.telefono) {
       return alert("Completa todos los campos");
     }
 
-    // Enviar al backend directamente como string
     const fechaHora = `${fechaSeleccionada}T${horarioSeleccionado}:00`;
 
     onCrearTurno({
-      cliente: { nombre: datosCliente.nombre, email: datosCliente.email },
+      cliente: {
+        nombre: datosCliente.nombre,
+        email: datosCliente.email,
+        telefono: datosCliente.telefono
+      },
       tipoTurno: datosCliente.tipoTurno,
       fechaHora
     });
@@ -96,15 +91,16 @@ useEffect(() => {
     setFechaSeleccionada("");
     setHorarioSeleccionado("");
     setHorariosDisponibles([]);
-    setDatosCliente({ nombre: "", email: "", tipoTurno: tiposTurno[0]?._id || "" });
+    setDatosCliente({ nombre: "", email: "", telefono: "", tipoTurno: tiposTurno[0]?._id || "" });
   };
 
   return (
     <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-2xl shadow-md">
+      {/* Fila 1 */}
       <InputField
         type="text"
         name="nombre"
-        placeholder="Nombre del cliente"
+        placeholder="Nombre completo"
         value={datosCliente.nombre}
         onChange={handleChange}
         required
@@ -112,19 +108,30 @@ useEffect(() => {
       <InputField
         type="email"
         name="email"
-        placeholder="Email del cliente"
+        placeholder="Email"
         value={datosCliente.email}
         onChange={handleChange}
         required
       />
+
+      {/* Fila 2 */}
+      <InputField
+        type="tel"
+        name="telefono"
+        placeholder="Teléfono"
+        value={datosCliente.telefono}
+        onChange={handleChange}
+        required
+      />
       <SelectField
-        label="Tipo de Turno"
         name="tipoTurno"
         options={tiposTurno}
         value={datosCliente.tipoTurno}
         onChange={handleChange}
         required
       />
+
+      {/* Fila 3 */}
       <InputField
         label="Fecha"
         type="date"
@@ -144,10 +151,17 @@ useEffect(() => {
             required
           />
         ) : (
-          <p className="col-span-2 text-red-600">No hay horarios disponibles para esta fecha</p>
+          <p className="text-red-600">No hay horarios disponibles para esta fecha</p>
         )
       )}
-      <Button type="submit" className="col-span-2">Confirmar Turno</Button>
+
+      {/* Fila 4: botón */}
+      <div className="md:col-span-2 flex justify-end">
+        <Button type="submit">
+          Confirmar Turno
+        </Button>
+      </div>
     </form>
+
   );
 }

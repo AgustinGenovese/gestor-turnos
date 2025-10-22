@@ -86,8 +86,22 @@ export const crearTurno = async (req, res) => {
     // 3️⃣ Buscar o crear cliente
     let clienteDoc = await Cliente.findOne({ email: cliente.email });
     if (!clienteDoc) {
-      clienteDoc = new Cliente({ nombre: cliente.nombre, email: cliente.email });
+      clienteDoc = new Cliente({
+        nombre: cliente.nombre, email: cliente.email, telefono: cliente.telefono,
+      });
       await clienteDoc.save();
+    } else {
+      // 🔄 Si existe, actualizo nombre o teléfono si cambiaron
+      let cambios = false;
+      if (cliente.nombre && cliente.nombre !== clienteDoc.nombre) {
+        clienteDoc.nombre = cliente.nombre;
+        cambios = true;
+      }
+      if (cliente.telefono && cliente.telefono !== clienteDoc.telefono) {
+        clienteDoc.telefono = cliente.telefono;
+        cambios = true;
+      }
+      if (cambios) await clienteDoc.save();
     }
 
     // 4️⃣ Verificar que no exista turno en la misma fecha/hora
@@ -146,6 +160,28 @@ export const obtenerTurnos = async (req, res) => {
     // 4️⃣ Capturar cualquier error y responder con código 500
     console.error("Error en obtenerTurnos:", error);
     res.status(500).json({ error: "Error al obtener turnos" });
+  }
+};
+
+export const eliminarTurno = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 1️⃣ Validar ID
+    if (!id) return res.status(400).json({ msg: "Falta el ID del turno" });
+
+    // 2️⃣ Buscar y eliminar
+    const turnoEliminado = await Turno.findByIdAndDelete(id);
+
+    if (!turnoEliminado) {
+      return res.status(404).json({ msg: "Turno no encontrado" });
+    }
+
+    // 3️⃣ Responder con éxito
+    res.json({ msg: "Turno eliminado correctamente", turno: turnoEliminado });
+  } catch (error) {
+    console.error("Error al eliminar turno:", error);
+    res.status(500).json({ error: "Error al eliminar turno" });
   }
 };
 

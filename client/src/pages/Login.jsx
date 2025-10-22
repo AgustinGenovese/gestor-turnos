@@ -2,9 +2,9 @@ import { useState } from "react";
 import { login, checkSesion } from "../services/authService.js";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
-import { InputField } from "../components/InputField.jsx";
-import { Button } from "../components/Button.jsx";
-import { Alert } from "../components/Alert.jsx";
+import { InputField } from "../components/UI/InputField.jsx";
+import { Button } from "../components/UI/Button.jsx";
+import { Alert } from "../components/UI/Alert.jsx";
 
 export default function Login() {
   const [email, setEmail] = useState("");
