@@ -18,3 +18,31 @@ export const obtenerTiposTurno = async (req, res) => {
     res.status(500).json({ error: "Error al obtener tipos de turno" });
   }
 };
+
+// ✅ Actualizar un tipo de turno
+export const actualizarTipoTurno = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const actualizado = await TipoTurno.findByIdAndUpdate(id, req.body, { new: true });
+    if (!actualizado) {
+      return res.status(404).json({ error: "Tipo de turno no encontrado" });
+    }
+    res.json(actualizado);
+  } catch (error) {
+    res.status(500).json({ error: "Error al actualizar tipo de turno" });
+  }
+};
+
+// ✅ Eliminar un tipo de turno
+export const eliminarTipoTurno = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const eliminado = await TipoTurno.findByIdAndDelete(id);
+    if (!eliminado) {
+      return res.status(404).json({ error: "Tipo de turno no encontrado" });
+    }
+    res.json({ mensaje: "Tipo de turno eliminado correctamente" });
+  } catch (error) {
+    res.status(500).json({ error: "Error al eliminar tipo de turno" });
+  }
+};

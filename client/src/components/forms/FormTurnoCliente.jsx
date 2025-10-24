@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { InputField } from "../UI/InputField.jsx";
 import { SelectField } from "../UI/SelectField.jsx";
+import { ButtonCliente } from "../UI/ButtonCliente.jsx";
 
 export function FormTurno({ onCrearTurno }) {
   const [datosCliente, setDatosCliente] = useState({ nombre: "", email: "", telefono: "", tipoTurno: "" });
@@ -164,23 +165,9 @@ export function FormTurno({ onCrearTurno }) {
 
       {/* Fila 4: botón nuevo con colores personalizados */}
       <div className="md:col-span-2 flex justify-end">
-        <button
-          type="submit"
-          className="
-            bg-[#c2a255] 
-            hover:bg-[#ccac5c] 
-            active:bg-[#ccac5c] 
-            text-white 
-            font-medium 
-            py-2 
-            px-6 
-            rounded-md 
-            shadow-sm 
-            transition-colors
-          "
-        >
+        <ButtonCliente type="submit" >
           Confirmar Turno
-        </button>
+        </ButtonCliente>
       </div>
     </form>
   );

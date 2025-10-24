@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Calendar, Users, LogOut, Menu, X } from "lucide-react";
+import { Calendar, Users, LogOut, Menu, X, Wrench } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 
 export function AppLayout() {
@@ -12,6 +12,8 @@ export function AppLayout() {
   const menuItems = [
     { name: "Calendario", path: "/CalendarAdmin", icon: <Calendar size={20} /> },
     { name: "Clientes", path: "/ClientesAdmin", icon: <Users size={20} /> },
+    { name: "Tipos de Turnos", path: "/TiposTurnosAdmin", icon: <Wrench size={20} /> },
+
   ];
 
   const logoutAndRedirect = async () => {
@@ -43,8 +45,8 @@ export function AppLayout() {
               key={item.name}
               to={item.path}
               className={`flex items-center gap-2 px-4 py-2 rounded transition
-                ${location.pathname === item.path 
-                  ? "bg-gray-700 font-semibold text-white" 
+                ${location.pathname === item.path
+                  ? "bg-gray-700 font-semibold text-white"
                   : "text-gray-300 hover:bg-gray-700 hover:text-white"}`}
             >
               {item.icon}

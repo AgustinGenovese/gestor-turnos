@@ -2,16 +2,15 @@ export function Button({ children, className = "", ...props }) {
   return (
     <button
       className={`
-        bg-[#449cfc] 
-        hover:bg-[#3c97fa] 
-        active:bg-[#4494fa] 
+        bg-blue-600 
         text-white 
-        font-medium 
+        px-4 
         py-2 
-        px-6
-        rounded-md 
+        rounded 
+        hover:bg-blue-700 
+        transition 
+        font-medium 
         shadow-sm 
-        transition-colors 
         ${className}
       `}
       {...props}
@@ -20,4 +19,5 @@ export function Button({ children, className = "", ...props }) {
     </button>
   );
 }
+
 
