@@ -25,14 +25,18 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.set("trust proxy", 1); // necesario si estás detrás de un proxy (Render lo hace)
 app.use(session({
   secret: process.env.SESSION_SECRET || "default_secret",
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false
+    secure: true,       // HTTPS obligatorio
+    sameSite: "none",   // permite cross-site cookies
+    maxAge: 1000 * 60 * 60 * 24 // 1 día, por ejemplo
   }
 }));
+
 
 app.use("/api/turnos", turnosRoutes);
 app.use("/api/clientes", clientesRoutes);

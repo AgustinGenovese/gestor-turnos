@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Edit, Trash2 } from "lucide-react"; // 👈 íconos
+import { API_URL } from "../../api/fetch.js"; // <-- importamos la URL del backend
 
 export default function ClientesPage() {
   const [clientes, setClientes] = useState([]);
@@ -10,7 +11,7 @@ export default function ClientesPage() {
   useEffect(() => {
     const fetchClientes = async () => {
       try {
-        const res = await fetch("/api/clientes");
+        const res = await fetch(`${API_URL}/api/clientes`, { credentials: "include" }); // <-- aquí
         if (!res.ok) throw new Error("Error al obtener clientes");
         const data = await res.json();
         setClientes(data);
@@ -42,7 +43,7 @@ export default function ClientesPage() {
     if (!window.confirm("¿Desea eliminar este cliente y todos sus turnos?")) return;
 
     try {
-      const res = await fetch(`/api/clientes/${id}`, { method: "DELETE" });
+      const res = await fetch(`${API_URL}/api/clientes/${id}`, { method: "DELETE", credentials: "include" }); // <-- aquí
       if (!res.ok) throw new Error("Error al eliminar cliente");
       setClientes((prev) => prev.filter((c) => c._id !== id));
     } catch (err) {
@@ -53,7 +54,7 @@ export default function ClientesPage() {
 
   const handleGuardar = async (cliente) => {
     try {
-      const res = await fetch(`/api/clientes/${cliente._id}`, {
+      const res = await fetch(`${API_URL}/api/clientes/${cliente._id}`, { // <-- aquí
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(cliente),

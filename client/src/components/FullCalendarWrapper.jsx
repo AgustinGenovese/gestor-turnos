@@ -1,6 +1,7 @@
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import esLocale from "@fullcalendar/core/locales/es";
+import { API_URL } from "../api/fetch.js"; // <-- importar la URL del backend
 
 export function FullCalendarWrapper({ turnos, onEliminarTurno }) {
   const eventos = turnos.map((turno) => ({
@@ -75,7 +76,7 @@ export function FullCalendarWrapper({ turnos, onEliminarTurno }) {
                     ) {
                       try {
                         const response = await fetch(
-                          `http://localhost:3000/api/turnos/${info.event.id}`,
+                          `${API_URL}/api/turnos/${info.event.id}`, // <-- usar API_URL
                           {
                             method: "DELETE",
                           }

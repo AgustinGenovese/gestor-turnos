@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { InputField } from "../UI/InputField.jsx";
 import { SelectField } from "../UI/SelectField.jsx";
 import { Button } from "../UI/Button.jsx";
+import { API_URL } from "../../api/fetch.js"; // <-- importar la URL del backend
 
 export function FormTurno({ onCrearTurno }) {
   const [datosCliente, setDatosCliente] = useState({ nombre: "", email: "", telefono: "", tipoTurno: "" });
@@ -14,7 +15,7 @@ export function FormTurno({ onCrearTurno }) {
   useEffect(() => {
     const fetchTiposTurno = async () => {
       try {
-        const res = await fetch("/api/tiposTurno");
+        const res = await fetch(`${API_URL}/api/tiposTurno`, { credentials: "include" });
         if (!res.ok) throw new Error("Error al obtener tipos de turno");
         const data = await res.json();
         const tiposFormateados = data.map(t => ({
@@ -44,7 +45,7 @@ export function FormTurno({ onCrearTurno }) {
 
     const fetchHorarios = async () => {
       try {
-        const res = await fetch(`/api/turnos/horarios?fecha=${fechaSeleccionada}`);
+        const res = await fetch(`${API_URL}/api/turnos/horarios?fecha=${fechaSeleccionada}`, { credentials: "include" });
         if (!res.ok) throw new Error("Error al obtener horarios");
 
         const data = await res.json();

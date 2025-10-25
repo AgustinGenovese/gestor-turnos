@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { InputField } from "../UI/InputField.jsx";
 import { ButtonCliente } from "../UI/ButtonCliente.jsx";
 import { SelectorTipoTurno } from "../UI/SelectorTipoTurno.jsx";
+import { API_URL } from "../../api/fetch.js"; // <-- importar la URL del backend
 
 export function FormTurnoCliente({ onCrearTurno }) {
   const [step, setStep] = useState(1);
@@ -24,7 +25,7 @@ export function FormTurnoCliente({ onCrearTurno }) {
   useEffect(() => {
     const fetchTiposTurno = async () => {
       try {
-        const res = await fetch("/api/tiposTurno");
+        const res = await fetch(`${API_URL}/api/tiposTurno`, { credentials: "include" });
         if (!res.ok) throw new Error("Error al obtener tipos de turno");
         const data = await res.json();
         setTiposTurno(data);
@@ -42,9 +43,8 @@ export function FormTurnoCliente({ onCrearTurno }) {
 
     const fetchFranjas = async () => {
       try {
-        const res = await fetch(
-          `/api/turnos/franjas?fecha=${fechaSeleccionada}&tipoTurno=${datosCliente.tipoTurno}`
-        );
+        const res = await fetch(`${API_URL}/api/turnos/franjas?fecha=${fechaSeleccionada}&tipoTurno=${datosCliente.tipoTurno}`, { credentials: "include" });
+
         if (!res.ok) throw new Error("Error al obtener franjas");
         const data = await res.json();
         setFranjasDisponibles(data.franjas || []);
@@ -65,9 +65,7 @@ export function FormTurnoCliente({ onCrearTurno }) {
 
     const fetchHorarios = async () => {
       try {
-        const res = await fetch(
-          `/api/turnos/horarios?fecha=${fechaSeleccionada}&franja=${franjaSeleccionada}&tipoTurno=${datosCliente.tipoTurno}`
-        );
+        const res = await fetch(`${API_URL}/api/turnos/horarios?fecha=${fechaSeleccionada}&franja=${franjaSeleccionada}&tipoTurno=${datosCliente.tipoTurno}`, { credentials: "include" });
         if (!res.ok) throw new Error("Error al obtener horarios");
         const data = await res.json();
         setHorariosDisponibles(data.horarios || []);

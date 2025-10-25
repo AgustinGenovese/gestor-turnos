@@ -1,10 +1,11 @@
 import { FormTurnoCliente } from "../components/forms/FormTurnoCliente";
+import { API_URL } from "../api/fetch"; // <-- importamos la URL del backend
 
 export default function TurnosPage() {
   const crearTurno = async (datos) => {
     console.log(datos);
     try {
-      const res = await fetch("/api/turnos", {
+      const res = await fetch(`${API_URL}/api/turnos`, { // <-- usamos API_URL
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datos),

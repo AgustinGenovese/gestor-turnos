@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Edit, Trash2, Save, X } from "lucide-react";
 import { Button } from "../../components/UI/Button.jsx";
+import { API_URL } from "../../api/fetch.js"; // <-- importamos la URL del backend
 
 export default function TiposTurnosAdmin() {
   const [tipos, setTipos] = useState([]);
@@ -8,15 +9,13 @@ export default function TiposTurnosAdmin() {
   const [editandoId, setEditandoId] = useState(null);
   const [editData, setEditData] = useState({ nombre: "", duracion: "" });
 
-  const API_URL = "/api/tiposTurno";
-
   useEffect(() => {
     obtenerTipos();
   }, []);
 
   const obtenerTipos = async () => {
     try {
-      const res = await fetch(API_URL);
+      const res = await fetch(`${API_URL}/api/tiposTurno`, { credentials: "include" });
       const data = await res.json();
       setTipos(data);
     } catch (error) {
@@ -27,7 +26,7 @@ export default function TiposTurnosAdmin() {
   const handleCrear = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(API_URL, {
+      const res = await fetch(`${API_URL}/api/tiposTurno`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(nuevo),
@@ -43,7 +42,7 @@ export default function TiposTurnosAdmin() {
   const handleEliminar = async (id) => {
     if (!window.confirm("¿Seguro que deseas eliminar este tipo de turno?")) return;
     try {
-      await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+      await fetch(`${API_URL}/api/tiposTurno/${id}`, { method: "DELETE", credentials: "include" });
       setTipos(tipos.filter((t) => t._id !== id));
     } catch {
       alert("Error al eliminar tipo de turno");
@@ -52,7 +51,7 @@ export default function TiposTurnosAdmin() {
 
   const handleGuardar = async (id) => {
     try {
-      const res = await fetch(`${API_URL}/${id}`, {
+      const res = await fetch(`${API_URL}/api/tiposTurno/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editData),

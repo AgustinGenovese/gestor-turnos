@@ -18,6 +18,7 @@ export default function Login() {
     try {
       await login(email, password);
       const data = await checkSesion();
+      console.log(data)
 
       if (data.autenticado) {
         setAutenticado(true);

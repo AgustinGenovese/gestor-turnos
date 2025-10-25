@@ -2,6 +2,7 @@ import { useAuth } from "../../context/AuthContext.jsx";
 import { useEffect, useState } from "react";
 import { FullCalendarWrapper } from "../../components/FullCalendarWrapper.jsx";
 import { FormTurno } from "../../components/forms/FormTurno.jsx";
+import { API_URL } from "../../api/fetch.js"; // <-- importamos la URL del backend
 
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc.js";
@@ -20,7 +21,7 @@ export default function CalendarAdmin() {
   useEffect(() => {
     const fetchTurnos = async () => {
       try {
-        const res = await fetch("/api/turnos");
+        const res = await fetch(`${API_URL}/api/turnos`, { credentials: "include" }); // <-- aquí
         if (!res.ok) throw new Error("Error al obtener turnos");
         const data = await res.json();
 
@@ -42,7 +43,7 @@ export default function CalendarAdmin() {
   // 🧾 Crear nuevo turno
   const crearTurno = async (datos) => {
     try {
-      const res = await fetch("/api/turnos", {
+      const res = await fetch(`${API_URL}/api/turnos`, { // <-- aquí
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datos),
@@ -56,7 +57,8 @@ export default function CalendarAdmin() {
       alert("Turno creado correctamente");
 
       // Refrescar turnos
-      const nuevosTurnos = await fetch("/api/turnos").then(r => r.json());
+      const nuevosTurnos = await fetch(`${API_URL}/api/turnos`, { credentials: "include" }) // <-- aquí
+        .then(r => r.json());
       const turnosConvertidos = nuevosTurnos.map(t => ({
         ...t,
         fechaHora: dayjs.utc(t.fechaHora).tz(ZONA_ARG).format("YYYY-MM-DD HH:mm"),
