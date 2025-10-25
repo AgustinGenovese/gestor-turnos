@@ -16,17 +16,22 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
 conectarDB();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // --- CORS ---
 const allowedOrigins = [
   "http://localhost:5173",
+  "https://gestor-turnos-2.onrender.com",
   "https://gestor-turnos-4.onrender.com"
 ];
 
 app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin) return callback(null, true); // Postman, etc.
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // para Postman o requests sin origin
     if (allowedOrigins.includes(origin) || origin.startsWith("https://gestor-turnos-")) {
       callback(null, true);
     } else {
@@ -36,10 +41,11 @@ app.use(cors({
   credentials: true
 }));
 
+// --- Middleware ---
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// --- Sesiones ---
+// --- Session ---
 app.set("trust proxy", 1); // Render usa proxy
 app.use(session({
   secret: process.env.SESSION_SECRET || "default_secret",
@@ -47,7 +53,7 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     secure: true,       // HTTPS obligatorio
-    sameSite: "none",   // cross-site cookies permitidas
+    sameSite: "none",   // permite cross-site cookies
     maxAge: 1000 * 60 * 60 * 24 // 1 día
   }
 }));
@@ -59,23 +65,19 @@ app.use("/api/tiposTurno", tipoTurnoRoutes);
 app.use("/api/usuarios", usuariosRoutes);
 app.use("/api/auth", authRoutes);
 
-// --- Servir React en producción ---
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
+// --- Fallback SPA React ---
 app.use(express.static(path.join(__dirname, "../client/dist")));
 
-// --- Fallback SPA ---
-app.get("*", (req, res) => {
+app.use((req, res, next) => {
+  if (req.path.startsWith("/api")) return next(); // pasa a las rutas API
   res.sendFile(path.join(__dirname, "../client/dist/index.html"));
 });
 
-// --- 404 API fallback (opcional) ---
+// --- 404 para rutas no encontradas de API ---
 app.use((req, res) => {
   res.status(404).send("Página no encontrada");
 });
 
-// --- Start server ---
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
