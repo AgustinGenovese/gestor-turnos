@@ -17,8 +17,14 @@ const PORT = process.env.PORT || 3000;
 
 conectarDB();
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://gestor-turnos-4.onrender.com"
+];
+
+// Configuración de CORS
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: allowedOrigins,
   credentials: true
 }));
 
