@@ -2,8 +2,6 @@ import express from "express";
 import session from "express-session";
 import cors from "cors";
 import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
 import { conectarDB } from "./config/db.js";
 
 import turnosRoutes from "./routes/turnos.js";
@@ -18,9 +16,6 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 conectarDB();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // --- CORS ---
 const allowedOrigins = [
@@ -64,14 +59,6 @@ app.use("/api/clientes", clientesRoutes);
 app.use("/api/tiposTurno", tipoTurnoRoutes);
 app.use("/api/usuarios", usuariosRoutes);
 app.use("/api/auth", authRoutes);
-
-// --- Fallback SPA React ---
-app.use(express.static(path.join(__dirname, "../client/dist")));
-
-app.use((req, res, next) => {
-  if (req.path.startsWith("/api")) return next(); // pasa a las rutas API
-  res.sendFile(path.join(__dirname, "../client/dist/index.html"));
-});
 
 // --- 404 para rutas no encontradas de API ---
 app.use((req, res) => {
