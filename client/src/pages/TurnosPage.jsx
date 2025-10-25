@@ -1,4 +1,4 @@
-import { FormTurno } from "../components/forms/FormTurnoCliente";
+import { FormTurnoCliente } from "../components/forms/FormTurnoCliente";
 
 export default function TurnosPage() {
   const crearTurno = async (datos) => {
@@ -65,7 +65,7 @@ export default function TurnosPage() {
       {/* CARD DEL FORM */}
       <div className="w-full max-w-3xl bg-gray-800 rounded-2xl shadow-lg p-6 md:p-4 border-t-4"
         style={{ backgroundColor: '#141418' }}>
-        <FormTurno onCrearTurno={crearTurno} />
+        <FormTurnoCliente onCrearTurno={crearTurno} />
       </div>
 
       {/* DECORACIÓN INFERIOR */}

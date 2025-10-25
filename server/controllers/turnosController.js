@@ -11,87 +11,156 @@ dayjs.extend(timezone);
 
 const ZONA_ARG = "America/Argentina/Buenos_Aires"; // zona horaria del negocio
 
-export const obtenerHorariosDisponibles = async (req, res) => {
+// ==========================
+// 1️⃣ FRANJAS HORARIAS DISPONIBLES
+// ==========================
+export const obtenerFranjasDisponibles = async (req, res) => {
   try {
-    const { fecha } = req.query;
-    if (!fecha) return res.status(400).json({ msg: "Falta la fecha" });
+    const { fecha, tipoTurno: tipoTurnoId } = req.query;
+    if (!fecha || !tipoTurnoId)
+      return res.status(400).json({ msg: "Faltan parámetros" });
 
-    // 1️⃣ Interpretar la fecha en la zona horaria local
+    const tipoTurno = await TipoTurno.findById(tipoTurnoId);
+    if (!tipoTurno)
+      return res.status(404).json({ msg: "Tipo de turno no encontrado" });
+
+    const duracion = tipoTurno.duracion; // en minutos
+    const apertura = 9;
+    const cierre = 18;
+
     const inicioDiaLocal = dayjs.tz(fecha, ZONA_ARG).startOf("day");
     const finDiaLocal = inicioDiaLocal.endOf("day");
 
-    // 2️⃣ Convertir a UTC para consultar Mongo
     const inicioDiaUTC = inicioDiaLocal.utc().toDate();
     const finDiaUTC = finDiaLocal.utc().toDate();
 
-    // 3️⃣ Buscar turnos del día
+    // 🔍 Traemos los turnos que puedan afectar el día completo
     const turnosOcupados = await Turno.find({
-      fechaHora: { $gte: inicioDiaUTC, $lte: finDiaUTC }
+      $and: [
+        { fechaHora: { $lt: finDiaUTC } },
+        { fin: { $gt: inicioDiaUTC } },
+      ],
     });
 
-    // 4️⃣ Generar horarios posibles (9:00 a 18:00 cada 30 minutos)
-    const horariosPosibles = [];
-    const apertura = 9;
-    const cierre = 18;
-    const intervalo = 30; // minutos
+    const franjasDisponibles = [];
 
     for (let h = apertura; h < cierre; h++) {
-      for (let m of [0, intervalo]) {
-        const horarioLocal = inicioDiaLocal.hour(h).minute(m).second(0);
-        const horarioUTC = horarioLocal.utc().toDate(); // UTC real para comparar
-        horariosPosibles.push(horarioUTC);
+      const franjaInicio = inicioDiaLocal.hour(h).minute(0).second(0);
+      const franjaFin = franjaInicio.add(1, "hour");
+
+      let hayBloqueLibre = false;
+      let cursor = franjaInicio;
+
+      while (cursor.valueOf() + duracion * 60000 <= franjaFin.valueOf()) {
+        const bloqueInicioUTC = cursor.utc().toDate();
+        const bloqueFinUTC = cursor.add(duracion, "minute").utc().toDate();
+
+        // 🧠 Verificamos si el bloque se solapa con algún turno (usando fechaHora y fin)
+        const choque = turnosOcupados.some(
+          (t) => bloqueInicioUTC < t.fin && bloqueFinUTC > t.fechaHora
+        );
+
+        if (!choque) {
+          hayBloqueLibre = true;
+          break;
+        }
+
+        cursor = cursor.add(5, "minute"); // avanza 5 minutos
+      }
+
+      if (hayBloqueLibre) {
+        franjasDisponibles.push({
+          inicio: franjaInicio.format("HH:mm"),
+          fin: franjaFin.format("HH:mm"),
+        });
       }
     }
 
-    // 5️⃣ Filtrar los ocupados usando timestamps
-    const ocupadosTimestamps = turnosOcupados.map(
-      t => new Date(t.fechaHora).getTime()
-    );
+    res.json({ franjas: franjasDisponibles });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Error al obtener franjas" });
+  }
+};
 
-    const disponibles = horariosPosibles.filter(
-      h => !ocupadosTimestamps.includes(h.getTime())
-    );
+// ==========================
+// 2️⃣ HORARIOS DISPONIBLES DENTRO DE UNA FRANJA
+// ==========================
+export const obtenerHorariosPorFranja = async (req, res) => {
+  try {
+    const { fecha, franja, tipoTurno: tipoTurnoId } = req.query;
+    if (!fecha || !franja || !tipoTurnoId)
+      return res.status(400).json({ msg: "Faltan parámetros" });
 
-    // 6️⃣ Convertir los disponibles a formato "HH:mm" (local)
-    const horariosLibres = disponibles.map(h =>
-      dayjs(h).tz(ZONA_ARG).format("HH:mm")
-    );
+    const tipoTurno = await TipoTurno.findById(tipoTurnoId);
+    if (!tipoTurno)
+      return res.status(404).json({ msg: "Tipo de turno no encontrado" });
 
-    // 7️⃣ Enviar respuesta
-    if (horariosLibres.length === 0)
+    const duracion = tipoTurno.duracion; // en minutos
+    const [inicioStr, finStr] = franja.split("-");
+    const franjaInicio = dayjs.tz(`${fecha} ${inicioStr}`, ZONA_ARG);
+    const franjaFin = dayjs.tz(`${fecha} ${finStr}`, ZONA_ARG);
+
+    const inicioUTC = franjaInicio.utc().toDate();
+    const finUTC = franjaFin.utc().toDate();
+
+    const turnosOcupados = await Turno.find({
+      $and: [
+        { fechaHora: { $lt: finUTC } },
+        { fin: { $gt: inicioUTC } },
+      ],
+    });
+
+    const horariosPosibles = [];
+    let cursor = franjaInicio;
+
+    while (cursor.isBefore(franjaFin)) {
+      const bloqueInicioUTC = cursor.utc().toDate();
+      const bloqueFinUTC = cursor.add(duracion, "minute").utc().toDate();
+
+      const choque = turnosOcupados.some(
+        (t) => bloqueInicioUTC < t.fin && bloqueFinUTC > t.fechaHora
+      );
+
+      if (!choque) {
+        horariosPosibles.push(cursor.format("HH:mm"));
+      }
+
+      cursor = cursor.add(5, "minute");
+    }
+
+    if (horariosPosibles.length === 0)
       return res.json({ msg: "No hay turnos disponibles", horarios: [] });
 
-    res.json({ horarios: horariosLibres });
+    res.json({ horarios: horariosPosibles });
   } catch (error) {
     console.error(error);
     res.status(500).json({ msg: "Error al obtener horarios" });
   }
 };
 
+// ==========================
+// 3️⃣ CREAR TURNO
+// ==========================
 export const crearTurno = async (req, res) => {
   try {
     const { cliente, tipoTurno, fechaHora } = req.body;
 
-    // 1️⃣ Validar datos obligatorios
     if (!cliente || !tipoTurno || !fechaHora) {
       return res.status(400).json({ msg: "Faltan datos obligatorios" });
     }
 
-    // 2️⃣ Convertir string ISO a Date en zona Argentina y luego a UTC
     const fecha = dayjs.tz(fechaHora, ZONA_ARG).toDate();
     if (isNaN(fecha.getTime()) || fecha < new Date()) {
       return res.status(400).json({ msg: "Fecha/hora inválida o pasada" });
     }
 
-    // 3️⃣ Buscar o crear cliente
+    // 🧾 Buscar o crear cliente
     let clienteDoc = await Cliente.findOne({ email: cliente.email });
     if (!clienteDoc) {
-      clienteDoc = new Cliente({
-        nombre: cliente.nombre, email: cliente.email, telefono: cliente.telefono,
-      });
+      clienteDoc = new Cliente(cliente);
       await clienteDoc.save();
     } else {
-      // 🔄 Si existe, actualizo nombre o teléfono si cambiaron
       let cambios = false;
       if (cliente.nombre && cliente.nombre !== clienteDoc.nombre) {
         clienteDoc.nombre = cliente.nombre;
@@ -104,28 +173,35 @@ export const crearTurno = async (req, res) => {
       if (cambios) await clienteDoc.save();
     }
 
-    // 4️⃣ Verificar que no exista turno en la misma fecha/hora
-    const turnoExistente = await Turno.findOne({ fechaHora: fecha });
-    if (turnoExistente) {
-      return res.status(400).json({ msg: "Horario ocupado" });
-    }
-
-    // 5️⃣ Verificar que el tipo de turno exista
+    // 📌 Tipo de turno
     const tipo = await TipoTurno.findById(tipoTurno);
     if (!tipo) {
       return res.status(404).json({ msg: "Tipo de turno no encontrado" });
     }
 
-    // 6️⃣ Crear turno
+    const duracion = tipo.duracion;
+    const fin = dayjs(fecha).add(duracion, "minute").toDate();
+
+    // 🚫 Verificar solapamiento exacto
+    const solapa = await Turno.findOne({
+      $and: [{ fechaHora: { $lt: fin } }, { fin: { $gt: fecha } }],
+    });
+
+    if (solapa) {
+      return res.status(400).json({ msg: "Horario ocupado" });
+    }
+
+    // ✅ Crear turno
     const turno = new Turno({
       cliente: clienteDoc._id,
       tipoTurno,
-      fechaHora: fecha
+      fechaHora: fecha,
+      duracion,
+      fin,
     });
 
     await turno.save();
 
-    // 7️⃣ Devolver turno con referencias pobladas
     const turnoPopulado = await Turno.findById(turno._id)
       .populate("cliente")
       .populate("tipoTurno");
@@ -136,6 +212,7 @@ export const crearTurno = async (req, res) => {
     res.status(500).json({ error: "Error al crear turno" });
   }
 };
+
 
 export const obtenerTurnos = async (req, res) => {
   try {

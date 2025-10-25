@@ -94,10 +94,13 @@ export default function TiposTurnosAdmin() {
           type="number"
           placeholder="Duración (min)"
           value={nuevo.duracion}
-          onChange={(e) => setNuevo({ ...nuevo, duracion: e.target.value })}
+          onChange={(e) => setNuevo({ ...nuevo, duracion: Number(e.target.value) })}
           className="border border-gray-300 p-2 rounded w-full sm:w-32"
+          step="5"
+          min="0"
           required
         />
+
         <Button>
           Agregar
         </Button>
@@ -126,6 +129,7 @@ export default function TiposTurnosAdmin() {
                           setEditData({ ...editData, nombre: e.target.value })
                         }
                         className="border p-2 rounded w-full"
+                        required
                       />
                     </td>
                     <td className="px-4 py-2">
@@ -133,9 +137,12 @@ export default function TiposTurnosAdmin() {
                         type="number"
                         value={editData.duracion}
                         onChange={(e) =>
-                          setEditData({ ...editData, duracion: e.target.value })
+                          setEditData({ ...editData, duracion: Number(e.target.value) })
                         }
                         className="border p-2 rounded w-full"
+                        step="5"
+                        min="0"
+                        required
                       />
                     </td>
                     <td className="px-4 py-2 flex justify-center gap-2">
