@@ -24,7 +24,14 @@ const allowedOrigins = [
 
 // Configuración de CORS
 app.use(cors({
-  origin: allowedOrigins,
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // para Postman o requests sin origin
+    if (allowedOrigins.includes(origin) || origin.startsWith("https://gestor-turnos-")) {
+      callback(null, true);
+    } else {
+      callback(new Error("Origen no permitido por CORS"));
+    }
+  },
   credentials: true
 }));
 
