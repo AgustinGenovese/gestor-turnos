@@ -2,6 +2,8 @@ import express from "express";
 import session from "express-session";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 import { conectarDB } from "./config/db.js";
 
 import turnosRoutes from "./routes/turnos.js";
@@ -14,18 +16,17 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
 conectarDB();
 
+// --- CORS ---
 const allowedOrigins = [
   "http://localhost:5173",
   "https://gestor-turnos-4.onrender.com"
 ];
 
-// Configuración de CORS
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // para Postman o requests sin origin
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true); // Postman, etc.
     if (allowedOrigins.includes(origin) || origin.startsWith("https://gestor-turnos-")) {
       callback(null, true);
     } else {
@@ -38,29 +39,43 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.set("trust proxy", 1); // necesario si estás detrás de un proxy (Render lo hace)
+// --- Sesiones ---
+app.set("trust proxy", 1); // Render usa proxy
 app.use(session({
   secret: process.env.SESSION_SECRET || "default_secret",
   resave: false,
   saveUninitialized: false,
   cookie: {
     secure: true,       // HTTPS obligatorio
-    sameSite: "none",   // permite cross-site cookies
-    maxAge: 1000 * 60 * 60 * 24 // 1 día, por ejemplo
+    sameSite: "none",   // cross-site cookies permitidas
+    maxAge: 1000 * 60 * 60 * 24 // 1 día
   }
 }));
 
-
+// --- Rutas API ---
 app.use("/api/turnos", turnosRoutes);
 app.use("/api/clientes", clientesRoutes);
 app.use("/api/tiposTurno", tipoTurnoRoutes);
 app.use("/api/usuarios", usuariosRoutes);
 app.use("/api/auth", authRoutes);
 
+// --- Servir React en producción ---
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use(express.static(path.join(__dirname, "../client/dist")));
+
+// --- Fallback SPA ---
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/dist/index.html"));
+});
+
+// --- 404 API fallback (opcional) ---
 app.use((req, res) => {
   res.status(404).send("Página no encontrada");
 });
 
+// --- Start server ---
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
