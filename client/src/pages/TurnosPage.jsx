@@ -17,7 +17,19 @@ export default function TurnosPage() {
         return alert(errorData.msg || "Error al crear turno");
       }
 
-      toast.success("Turno creado correctamente");
+      toast.success(
+        <div className="text-center">
+          <strong className="block text-lg">Turno creado correctamente</strong>
+          <span className="text-sm text-gray-900">
+            Verifique su correo electrónico.
+          </span>
+        </div>,
+        {
+          duration: 5000,
+        }
+      );
+
+
     } catch (err) {
       console.error(err);
       alert("Error al crear turno");

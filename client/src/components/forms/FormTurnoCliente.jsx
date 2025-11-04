@@ -188,8 +188,10 @@ export function FormTurnoCliente({ onCrearTurno }) {
             placeholder="Email"
             value={datosCliente.email}
             onChange={handleChange}
+            required
             className="text-black"
           />
+          
           <InputField
             type="tel"
             name="telefono"

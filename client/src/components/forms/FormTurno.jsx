@@ -8,22 +8,19 @@ export function FormTurno({ onCrearTurno }) {
   const [datosCliente, setDatosCliente] = useState({ nombre: "", email: "", telefono: "", tipoTurno: "" });
   const [tiposTurno, setTiposTurno] = useState([]);
   const [fechaSeleccionada, setFechaSeleccionada] = useState("");
-  const [horarioSeleccionado, setHorarioSeleccionado] = useState("");
+  const [franjasDisponibles, setFranjasDisponibles] = useState([]);
+  const [franjaSeleccionada, setFranjaSeleccionada] = useState("");
   const [horariosDisponibles, setHorariosDisponibles] = useState([]);
+  const [horarioSeleccionado, setHorarioSeleccionado] = useState("");
 
-  // Cargar tipos de turno
+  // 🔹 Cargar tipos de turno
   useEffect(() => {
     const fetchTiposTurno = async () => {
       try {
         const res = await fetch(`${API_URL}/api/tiposTurno`, { credentials: "include" });
         if (!res.ok) throw new Error("Error al obtener tipos de turno");
         const data = await res.json();
-        const tiposFormateados = data.map(t => ({
-          _id: t._id,
-          nombre: `${t.nombre} (${t.duracion} min)`,
-          duracion: t.duracion || 0
-        }));
-        setTiposTurno(tiposFormateados);
+        setTiposTurno(data);
       } catch (err) {
         console.error(err);
         setTiposTurno([]);
@@ -36,43 +33,62 @@ export function FormTurno({ onCrearTurno }) {
     setDatosCliente({ ...datosCliente, [e.target.name]: e.target.value });
   };
 
-  // Traer horarios disponibles
+  // 🔹 Traer franjas disponibles cuando cambian fecha o tipo de turno
   useEffect(() => {
-    if (!fechaSeleccionada) return;
+    if (!fechaSeleccionada || !datosCliente.tipoTurno) return;
 
-    const year = Number(fechaSeleccionada.split("-")[0]);
-    if (year !== 2025 && year !== 2026) return;
+    const fetchFranjas = async () => {
+      try {
+        const res = await fetch(
+          `${API_URL}/api/turnos/franjas?fecha=${fechaSeleccionada}&tipoTurno=${datosCliente.tipoTurno}`,
+          { credentials: "include" }
+        );
+        if (!res.ok) throw new Error("Error al obtener franjas");
+        const data = await res.json();
+        setFranjasDisponibles(data.franjas || []);
+        setFranjaSeleccionada("");
+        setHorariosDisponibles([]);
+        setHorarioSeleccionado("");
+      } catch (err) {
+        console.error(err);
+        setFranjasDisponibles([]);
+      }
+    };
+
+    fetchFranjas();
+  }, [fechaSeleccionada, datosCliente.tipoTurno]);
+
+  // 🔹 Traer horarios cuando cambia la franja seleccionada
+  useEffect(() => {
+    if (!franjaSeleccionada) return;
 
     const fetchHorarios = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/turnos/horarios?fecha=${fechaSeleccionada}`, { credentials: "include" });
+        const esUltimaFranja =
+          franjasDisponibles.length > 0 &&
+          franjasDisponibles[franjasDisponibles.length - 1].inicio === franjaSeleccionada.split("-")[0];
+
+        const url = `${API_URL}/api/turnos/horarios?fecha=${fechaSeleccionada}&franja=${franjaSeleccionada}&tipoTurno=${datosCliente.tipoTurno}&ultima=${esUltimaFranja}`;
+
+        const res = await fetch(url, { credentials: "include" });
         if (!res.ok) throw new Error("Error al obtener horarios");
 
         const data = await res.json();
-        const horariosArray = Array.isArray(data) ? data : data.horarios || [];
-        const horariosFormateados = horariosArray.map(h => ({ value: h, label: h }));
-
-        setHorariosDisponibles(horariosFormateados);
+        setHorariosDisponibles(data.horarios || []);
+        setHorarioSeleccionado(data.horarios?.[0] || "");
       } catch (err) {
         console.error(err);
         setHorariosDisponibles([]);
+        setHorarioSeleccionado("");
       }
     };
 
     fetchHorarios();
-  }, [fechaSeleccionada]);
-
-  useEffect(() => {
-    if (horariosDisponibles.length > 0) {
-      setHorarioSeleccionado(horariosDisponibles[0].value);
-    } else {
-      setHorarioSeleccionado("");
-    }
-  }, [horariosDisponibles]);
+  }, [franjaSeleccionada, fechaSeleccionada, datosCliente.tipoTurno, franjasDisponibles]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!fechaSeleccionada || !horarioSeleccionado || !datosCliente.tipoTurno || !datosCliente.telefono) {
+    if (!fechaSeleccionada || !franjaSeleccionada || !horarioSeleccionado || !datosCliente.tipoTurno || !datosCliente.telefono) {
       return alert("Completa todos los campos");
     }
 
@@ -90,14 +106,15 @@ export function FormTurno({ onCrearTurno }) {
 
     // Reset del formulario
     setFechaSeleccionada("");
-    setHorarioSeleccionado("");
+    setFranjasDisponibles([]);
+    setFranjaSeleccionada("");
     setHorariosDisponibles([]);
-    setDatosCliente({ nombre: "", email: "", telefono: "", tipoTurno: tiposTurno[0]?._id || "" });
+    setHorarioSeleccionado("");
+    setDatosCliente({ nombre: "", email: "", telefono: "", tipoTurno: "" });
   };
 
   return (
     <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-2xl shadow-md">
-      {/* Fila 1 */}
       <InputField
         type="text"
         name="nombre"
@@ -115,7 +132,6 @@ export function FormTurno({ onCrearTurno }) {
         required
       />
 
-      {/* Fila 2 */}
       <InputField
         type="tel"
         name="telefono"
@@ -126,13 +142,12 @@ export function FormTurno({ onCrearTurno }) {
       />
       <SelectField
         name="tipoTurno"
-        options={tiposTurno}
+        options={tiposTurno.map(t => ({ value: t._id, label: t.nombre }))}
         value={datosCliente.tipoTurno}
         onChange={handleChange}
         required
       />
 
-      {/* Fila 3 */}
       <InputField
         label="Fecha"
         type="date"
@@ -141,28 +156,49 @@ export function FormTurno({ onCrearTurno }) {
         onChange={(e) => setFechaSeleccionada(e.target.value)}
         required
       />
-      {fechaSeleccionada && (
-        horariosDisponibles.length > 0 ? (
-          <SelectField
-            label="Horario"
-            name="horario"
-            options={horariosDisponibles}
-            value={horarioSeleccionado}
-            onChange={(e) => setHorarioSeleccionado(e.target.value)}
+      {fechaSeleccionada && franjasDisponibles.length > 0 ? (
+        <div className="flex flex-col">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Franja horaria
+          </label>
+          <select
+            name="franja"
+            value={franjaSeleccionada}
+            onChange={(e) => setFranjaSeleccionada(e.target.value)}
             required
-          />
-        ) : (
-          <p className="text-red-600">No hay horarios disponibles para esta fecha</p>
-        )
-      )}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+          >
+            <option value="">Seleccionar franja</option>
+            {franjasDisponibles.map(f => (
+              <option key={f.inicio} value={`${f.inicio}-${f.fin}`}>
+                {f.inicio} - {f.fin}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : fechaSeleccionada ? (
+        <p className="text-red-600">No hay franjas disponibles para esta fecha</p>
+      ) : null}
 
-      {/* Fila 4: botón */}
+      {franjaSeleccionada && horariosDisponibles.length > 0 ? (
+        <select
+          name="horario"
+          value={horarioSeleccionado}
+          onChange={(e) => setHorarioSeleccionado(e.target.value)}
+          required
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+        >
+          {horariosDisponibles.map(h => (
+            <option key={h} value={h}>{h}</option>
+          ))}
+        </select>
+      ) : franjaSeleccionada ? (
+        <p className="text-red-600">No hay horarios disponibles para esta franja</p>
+      ) : null}
+
       <div className="md:col-span-2 flex justify-end">
-        <Button type="submit">
-          Confirmar Turno
-        </Button>
+        <Button type="submit">Confirmar Turno</Button>
       </div>
     </form>
-
   );
 }

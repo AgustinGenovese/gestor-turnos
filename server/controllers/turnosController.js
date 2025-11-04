@@ -1,3 +1,4 @@
+import nodemailer from "nodemailer";
 import Turno from "../models/turno.js";
 import TipoTurno from "../models/tipoTurno.js";
 import Cliente from "../models/cliente.js";
@@ -91,9 +92,6 @@ export const obtenerFranjasDisponibles = async (req, res) => {
   }
 };
 
-// ==========================
-// 2️⃣ HORARIOS DISPONIBLES DENTRO DE UNA FRANJA
-// ==========================
 export const obtenerHorariosPorFranja = async (req, res) => {
   try {
     const { fecha, franja, tipoTurno: tipoTurnoId, ultima } = req.query;
@@ -154,9 +152,6 @@ export const obtenerHorariosPorFranja = async (req, res) => {
   }
 };
 
-// ==========================
-// 3️⃣ CREAR TURNO
-// ==========================
 export const crearTurno = async (req, res) => {
   try {
     const { cliente, tipoTurno, fechaHora } = req.body;
@@ -221,7 +216,46 @@ export const crearTurno = async (req, res) => {
       .populate("cliente")
       .populate("tipoTurno");
 
-    res.status(201).json(turnoPopulado);
+    // 📧 Enviar email de confirmación (no bloqueante)
+    try {
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+
+      const mailOptions = {
+        from: `"Sarkirian Barbershop" <${process.env.EMAIL_USER}>`,
+        to: clienteDoc.email,
+        subject: "Confirmación de turno - Sarkirian Barbershop",
+        html: `
+          <div style="font-family: Arial, sans-serif; color: #333; padding: 16px;">
+            <h2 style="color: #c2a255;">¡Tu turno fue confirmado!</h2>
+            <p>Hola <strong>${clienteDoc.nombre}</strong>,</p>
+            <p>Gracias por reservar tu turno en <strong>Sarkirian Barbershop</strong>.</p>
+            <p><b>Fecha:</b> ${dayjs(turnoPopulado.fechaHora).tz(ZONA_ARG).format("DD/MM/YYYY")}<br/>
+               <b>Hora:</b> ${dayjs(turnoPopulado.fechaHora).tz(ZONA_ARG).format("HH:mm")} hs<br/>
+               <b>Servicio:</b> ${turnoPopulado.tipoTurno.nombre}</p>
+            <p>Por favor, verificá que tus datos sean correctos. Si necesitás modificar o cancelar tu turno, comunicate con nosotros.</p>
+            <br/>
+            <p style="font-size: 0.9rem; color: #777;">Sarkirian Barbershop © ${new Date().getFullYear()}</p>
+          </div>
+        `,
+      };
+
+      await transporter.sendMail(mailOptions);
+    } catch (err) {
+      console.error("Error enviando correo:", err);
+      // opcional: podés agregar un flag para informar al frontend que el mail falló
+    }
+
+    res.status(201).json({
+      msg: "Turno creado correctamente",
+      turno: turnoPopulado,
+    });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error al crear turno" });
@@ -275,5 +309,3 @@ export const eliminarTurno = async (req, res) => {
     res.status(500).json({ error: "Error al eliminar turno" });
   }
 };
-
-
