@@ -1,6 +1,6 @@
 export function SelectorTipoTurno({ tipos, onSelect, seleccionado }) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
       {tipos.map((tipo) => {
         const activo = seleccionado?._id === tipo._id;
         return (
@@ -9,8 +9,8 @@ export function SelectorTipoTurno({ tipos, onSelect, seleccionado }) {
             onClick={() => onSelect(tipo)}
             type="button"
             className={`p-3 rounded-lg border text-left shadow-sm transition-all
-              ${activo 
-                ? "border-[#c2a255] bg-[#c2a255]/10 shadow-md text-white" 
+              ${activo
+                ? "border-[#c2a255] bg-[#c2a255]/10 shadow-md text-white"
                 : "border-gray-200 hover:border-[#c2a255]/50"
               }
             `}

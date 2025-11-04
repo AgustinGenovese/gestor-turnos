@@ -11,7 +11,7 @@ export function FormTurnoCliente({ onCrearTurno }) {
     apellido: "",
     email: "",
     telefono: "",
-    tipoTurno: ""
+    tipoTurno: "",
   });
 
   const [tiposTurno, setTiposTurno] = useState([]);
@@ -25,7 +25,9 @@ export function FormTurnoCliente({ onCrearTurno }) {
   useEffect(() => {
     const fetchTiposTurno = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/tiposTurno`, { credentials: "include" });
+        const res = await fetch(`${API_URL}/api/tiposTurno`, {
+          credentials: "include",
+        });
         if (!res.ok) throw new Error("Error al obtener tipos de turno");
         const data = await res.json();
         setTiposTurno(data);
@@ -43,7 +45,10 @@ export function FormTurnoCliente({ onCrearTurno }) {
 
     const fetchFranjas = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/turnos/franjas?fecha=${fechaSeleccionada}&tipoTurno=${datosCliente.tipoTurno}`, { credentials: "include" });
+        const res = await fetch(
+          `${API_URL}/api/turnos/franjas?fecha=${fechaSeleccionada}&tipoTurno=${datosCliente.tipoTurno}`,
+          { credentials: "include" }
+        );
 
         if (!res.ok) throw new Error("Error al obtener franjas");
         const data = await res.json();
@@ -65,8 +70,16 @@ export function FormTurnoCliente({ onCrearTurno }) {
 
     const fetchHorarios = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/turnos/horarios?fecha=${fechaSeleccionada}&franja=${franjaSeleccionada}&tipoTurno=${datosCliente.tipoTurno}`, { credentials: "include" });
+        const esUltimaFranja =
+          franjasDisponibles.length > 0 &&
+          franjasDisponibles[franjasDisponibles.length - 1].inicio ===
+          franjaSeleccionada.split("-")[0];
+
+        const url = `${API_URL}/api/turnos/horarios?fecha=${fechaSeleccionada}&franja=${franjaSeleccionada}&tipoTurno=${datosCliente.tipoTurno}&ultima=${esUltimaFranja}`;
+
+        const res = await fetch(url, { credentials: "include" });
         if (!res.ok) throw new Error("Error al obtener horarios");
+
         const data = await res.json();
         setHorariosDisponibles(data.horarios || []);
         setHorarioSeleccionado(data.horarios?.[0] || "");
@@ -76,8 +89,9 @@ export function FormTurnoCliente({ onCrearTurno }) {
         setHorarioSeleccionado("");
       }
     };
+
     fetchHorarios();
-  }, [franjaSeleccionada, fechaSeleccionada, datosCliente.tipoTurno]);
+  }, [franjaSeleccionada, fechaSeleccionada, datosCliente.tipoTurno, franjasDisponibles]);
 
   // 🔹 Handlers
   const handleChange = (e) => {
@@ -86,7 +100,13 @@ export function FormTurnoCliente({ onCrearTurno }) {
 
   const handleNextStep = (e) => {
     e.preventDefault();
-    if (step === 1 && (!datosCliente.nombre || !datosCliente.apellido || !datosCliente.telefono || !datosCliente.email)) {
+    if (
+      step === 1 &&
+      (!datosCliente.nombre ||
+        !datosCliente.apellido ||
+        !datosCliente.telefono ||
+        !datosCliente.email)
+    ) {
       return alert("Completa todos los campos antes de continuar");
     }
 
@@ -113,15 +133,21 @@ export function FormTurnoCliente({ onCrearTurno }) {
       cliente: {
         nombre: `${datosCliente.nombre} ${datosCliente.apellido}`,
         email: datosCliente.email,
-        telefono: datosCliente.telefono
+        telefono: datosCliente.telefono,
       },
       tipoTurno: datosCliente.tipoTurno,
-      fechaHora
+      fechaHora,
     });
 
     // Reset
     setStep(1);
-    setDatosCliente({ nombre: "", apellido: "", email: "", telefono: "", tipoTurno: "" });
+    setDatosCliente({
+      nombre: "",
+      apellido: "",
+      email: "",
+      telefono: "",
+      tipoTurno: "",
+    });
     setFechaSeleccionada("");
     setFranjasDisponibles([]);
     setFranjaSeleccionada("");
@@ -182,7 +208,7 @@ export function FormTurnoCliente({ onCrearTurno }) {
       {/* 🔸 Paso 2: Selección del tipo de turno */}
       {step === 2 && (
         <>
-          <div className="md:col-span-2 ">
+          <div className="md:col-span-2">
             <label className="block text-lg font-medium text-gray-100">
               Seleccione Tipo de Turno
             </label>
@@ -190,15 +216,21 @@ export function FormTurnoCliente({ onCrearTurno }) {
           <div className="md:col-span-2">
             <SelectorTipoTurno
               tipos={tiposTurno}
-              seleccionado={tiposTurno.find((t) => t._id === datosCliente.tipoTurno)}
+              seleccionado={tiposTurno.find(
+                (t) => t._id === datosCliente.tipoTurno
+              )}
               onSelect={(tipo) =>
                 setDatosCliente((prev) => ({ ...prev, tipoTurno: tipo._id }))
               }
             />
           </div>
-          <div className="md:col-span-2 flex justify-between mt-4">
-            <ButtonCliente onClick={handlePrevStep}>Anterior</ButtonCliente>
-            <ButtonCliente onClick={handleNextStep}>Siguiente</ButtonCliente>
+          <div className="md:col-span-2 flex justify-between gap-4 mt-4">
+            <ButtonCliente onClick={handlePrevStep} className="flex-1 min-w-[100px] px-3 py-2 text-sm">
+              Anterior
+            </ButtonCliente>
+            <ButtonCliente onClick={handleNextStep} className="flex-1 min-w-[100px] px-3 py-2 text-sm">
+              Siguiente
+            </ButtonCliente>
           </div>
         </>
       )}
@@ -206,41 +238,44 @@ export function FormTurnoCliente({ onCrearTurno }) {
       {/* 🔸 Paso 3: Fecha, franja y horario */}
       {step === 3 && (
         <>
-          <InputField
-            label="Fecha"
-            type="date"
-            name="fecha"
-            value={fechaSeleccionada}
-            onChange={(e) => setFechaSeleccionada(e.target.value)}
-            required
-            className="text-black"
-          />
+          {/* 🟡 Fecha y franja apiladas siempre */}
+          <div className="md:col-span-2 grid grid-cols-1 gap-3">
+            <InputField
+              label="Fecha"
+              type="date"
+              name="fecha"
+              value={fechaSeleccionada}
+              onChange={(e) => setFechaSeleccionada(e.target.value)}
+              required
+              className="text-black"
+            />
 
-          {fechaSeleccionada && franjasDisponibles.length > 0 ? (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Franja horaria
-              </label>
-              <select
-                name="franja"
-                value={franjaSeleccionada}
-                onChange={(e) => setFranjaSeleccionada(e.target.value)}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              >
-                <option value="">Seleccionar franja</option>
-                {franjasDisponibles.map((f) => (
-                  <option key={f.inicio} value={`${f.inicio}-${f.fin}`}>
-                    {f.inicio} - {f.fin}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ) : fechaSeleccionada ? (
-            <p className="text-red-600 mt-2 col-span-2">
-              No hay franjas disponibles para esta fecha
-            </p>
-          ) : null}
+            {fechaSeleccionada && franjasDisponibles.length > 0 ? (
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Franja horaria
+                </label>
+                <select
+                  name="franja"
+                  value={franjaSeleccionada}
+                  onChange={(e) => setFranjaSeleccionada(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                >
+                  <option value="">Seleccionar franja</option>
+                  {franjasDisponibles.map((f) => (
+                    <option key={f.inicio} value={`${f.inicio}-${f.fin}`}>
+                      {f.inicio} - {f.fin}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : fechaSeleccionada ? (
+              <p className="text-red-600 mt-2 col-span-2">
+                No hay franjas disponibles para esta fecha
+              </p>
+            ) : null}
+          </div>
 
           {franjaSeleccionada && horariosDisponibles.length > 0 ? (
             <div className="col-span-2 grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
@@ -250,8 +285,8 @@ export function FormTurnoCliente({ onCrearTurno }) {
                   type="button"
                   onClick={() => setHorarioSeleccionado(h)}
                   className={`py-2 px-4 rounded-md text-white ${horarioSeleccionado === h
-                    ? "bg-[#c2a255]"
-                    : "bg-gray-700 hover:bg-gray-600"
+                      ? "bg-[#c2a255]"
+                      : "bg-gray-700 hover:bg-gray-600"
                     }`}
                 >
                   {h}
@@ -264,10 +299,16 @@ export function FormTurnoCliente({ onCrearTurno }) {
             </p>
           ) : null}
 
-          <div className="md:col-span-2 flex justify-between mt-4">
-            <ButtonCliente onClick={handlePrevStep}>Anterior</ButtonCliente>
-            <ButtonCliente type="submit" onClick={handleSubmit}>
-              Confirmar Turno
+          <div className="md:col-span-2 flex justify-between gap-4 mt-4">
+            <ButtonCliente onClick={handlePrevStep} className="flex-1 min-w-[100px] px-3 py-2 text-sm">
+              Anterior
+            </ButtonCliente>
+            <ButtonCliente
+              type="submit"
+              onClick={handleSubmit}
+              className="flex-1 min-w-[100px] px-3 py-2 text-sm"
+            >
+              Confirmar
             </ButtonCliente>
           </div>
         </>
@@ -275,3 +316,4 @@ export function FormTurnoCliente({ onCrearTurno }) {
     </form>
   );
 }
+

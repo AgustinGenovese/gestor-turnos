@@ -7,12 +7,12 @@ export function ButtonCliente({ children, className = "", ...props }) {
         active:bg-[#ccac5c]
         text-white
         font-medium
-        py-2
-        px-6
+        py-1.5
+        px-3
         rounded-md
         shadow-sm
-        transition-colorsF
-        ${className}F
+        transition-colors
+        ${className}
       `}
             {...props}
         >

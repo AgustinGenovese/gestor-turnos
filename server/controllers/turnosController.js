@@ -11,9 +11,6 @@ dayjs.extend(timezone);
 
 const ZONA_ARG = "America/Argentina/Buenos_Aires"; // zona horaria del negocio
 
-// ==========================
-// 1️⃣ FRANJAS HORARIAS DISPONIBLES
-// ==========================
 export const obtenerFranjasDisponibles = async (req, res) => {
   try {
     const { fecha, tipoTurno: tipoTurnoId } = req.query;
@@ -42,8 +39,12 @@ export const obtenerFranjasDisponibles = async (req, res) => {
       ],
     });
 
+    const inicioLaboral = inicioDiaLocal.hour(apertura).minute(0).second(0);
+    const finLaboral = inicioDiaLocal.hour(cierre).minute(0).second(0);
+
     const franjasDisponibles = [];
 
+    // 🔄 Analizamos hora por hora (franjas de 1h)
     for (let h = apertura; h < cierre; h++) {
       const franjaInicio = inicioDiaLocal.hour(h).minute(0).second(0);
       const franjaFin = franjaInicio.add(1, "hour");
@@ -51,21 +52,28 @@ export const obtenerFranjasDisponibles = async (req, res) => {
       let hayBloqueLibre = false;
       let cursor = franjaInicio;
 
-      while (cursor.valueOf() + duracion * 60000 <= franjaFin.valueOf()) {
+      // 🔁 Recorremos dentro de la franja, permitiendo que el bloque cruce al siguiente tramo
+      while (cursor.valueOf() + duracion * 60000 <= finLaboral.valueOf()) {
         const bloqueInicioUTC = cursor.utc().toDate();
         const bloqueFinUTC = cursor.add(duracion, "minute").utc().toDate();
 
-        // 🧠 Verificamos si el bloque se solapa con algún turno (usando fechaHora y fin)
-        const choque = turnosOcupados.some(
-          (t) => bloqueInicioUTC < t.fin && bloqueFinUTC > t.fechaHora
-        );
+        // 🧠 Si el bloque cae al menos parcialmente dentro de la franja actual
+        const tocaFranja =
+          cursor.isBefore(franjaFin) &&
+          cursor.add(duracion, "minute").isAfter(franjaInicio);
 
-        if (!choque) {
-          hayBloqueLibre = true;
-          break;
+        if (tocaFranja) {
+          const choque = turnosOcupados.some(
+            (t) => bloqueInicioUTC < t.fin && bloqueFinUTC > t.fechaHora
+          );
+
+          if (!choque) {
+            hayBloqueLibre = true;
+            break; // ya sabemos que hay disponibilidad en esta franja
+          }
         }
 
-        cursor = cursor.add(5, "minute"); // avanza 5 minutos
+        cursor = cursor.add(5, "minute"); // avanza 5 min
       }
 
       if (hayBloqueLibre) {
@@ -88,7 +96,8 @@ export const obtenerFranjasDisponibles = async (req, res) => {
 // ==========================
 export const obtenerHorariosPorFranja = async (req, res) => {
   try {
-    const { fecha, franja, tipoTurno: tipoTurnoId } = req.query;
+    const { fecha, franja, tipoTurno: tipoTurnoId, ultima } = req.query;
+
     if (!fecha || !franja || !tipoTurnoId)
       return res.status(400).json({ msg: "Faltan parámetros" });
 
@@ -96,35 +105,41 @@ export const obtenerHorariosPorFranja = async (req, res) => {
     if (!tipoTurno)
       return res.status(404).json({ msg: "Tipo de turno no encontrado" });
 
-    const duracion = tipoTurno.duracion; // en minutos
+    const duracion = tipoTurno.duracion; // minutos
     const [inicioStr, finStr] = franja.split("-");
+
     const franjaInicio = dayjs.tz(`${fecha} ${inicioStr}`, ZONA_ARG);
     const franjaFin = dayjs.tz(`${fecha} ${finStr}`, ZONA_ARG);
 
     const inicioUTC = franjaInicio.utc().toDate();
     const finUTC = franjaFin.utc().toDate();
 
+    // ✅ Usamos franjaFin.add(1, 'hour') ANTES de convertir a Date
+    const finUTCConMargen = franjaFin.add(1, "hour").utc().toDate();
+
     const turnosOcupados = await Turno.find({
       $and: [
-        { fechaHora: { $lt: finUTC } },
+        { fechaHora: { $lt: finUTCConMargen } },
         { fin: { $gt: inicioUTC } },
       ],
     });
 
     const horariosPosibles = [];
-    let cursor = franjaInicio;
+    let cursor = franjaInicio.clone();
 
     while (cursor.isBefore(franjaFin)) {
-      const bloqueInicioUTC = cursor.utc().toDate();
-      const bloqueFinUTC = cursor.add(duracion, "minute").utc().toDate();
+      const bloqueInicio = cursor.clone();
+      const bloqueFin = bloqueInicio.clone().add(duracion, "minute");
 
-      const choque = turnosOcupados.some(
-        (t) => bloqueInicioUTC < t.fin && bloqueFinUTC > t.fechaHora
-      );
+      if (ultima === "true" && bloqueFin.isAfter(franjaFin)) break;
 
-      if (!choque) {
-        horariosPosibles.push(cursor.format("HH:mm"));
-      }
+      const choca = turnosOcupados.some((t) => {
+        const turnoInicio = dayjs(t.fechaHora);
+        const turnoFin = dayjs(t.fin);
+        return bloqueInicio.isBefore(turnoFin) && bloqueFin.isAfter(turnoInicio);
+      });
+
+      if (!choca) horariosPosibles.push(bloqueInicio.format("HH:mm"));
 
       cursor = cursor.add(5, "minute");
     }
@@ -212,7 +227,6 @@ export const crearTurno = async (req, res) => {
     res.status(500).json({ error: "Error al crear turno" });
   }
 };
-
 
 export const obtenerTurnos = async (req, res) => {
   try {
