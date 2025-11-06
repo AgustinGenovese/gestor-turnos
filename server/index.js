@@ -19,9 +19,7 @@ conectarDB();
 
 // --- CORS ---
 const allowedOrigins = [
-  "http://localhost:5173", // Frontend local
-  "https://gestor-turnos-2.onrender.com",
-  "https://gestor-turnos-4.onrender.com"
+  process.env.FRONTEND_URL || "http://localhost:5173"
 ];
 
 app.use(

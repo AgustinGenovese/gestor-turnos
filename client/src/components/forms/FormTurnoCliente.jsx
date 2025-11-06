@@ -2,7 +2,13 @@ import { useState, useEffect } from "react";
 import { InputField } from "../UI/InputField.jsx";
 import { ButtonCliente } from "../UI/ButtonCliente.jsx";
 import { SelectorTipoTurno } from "../UI/SelectorTipoTurno.jsx";
-import { API_URL } from "../../api/fetch.js"; // <-- importar la URL del backend
+import { API_URL } from "../../api/fetch.js";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
+// 🔹 Importar Toastify
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export function FormTurnoCliente({ onCrearTurno }) {
   const [step, setStep] = useState(1);
@@ -25,15 +31,14 @@ export function FormTurnoCliente({ onCrearTurno }) {
   useEffect(() => {
     const fetchTiposTurno = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/tiposTurno`, {
-          credentials: "include",
-        });
+        const res = await fetch(`${API_URL}/api/tiposTurno`, { credentials: "include" });
         if (!res.ok) throw new Error("Error al obtener tipos de turno");
         const data = await res.json();
         setTiposTurno(data);
       } catch (err) {
         console.error(err);
         setTiposTurno([]);
+        toast.error("No se pudieron cargar los tipos de turno");
       }
     };
     fetchTiposTurno();
@@ -59,6 +64,7 @@ export function FormTurnoCliente({ onCrearTurno }) {
       } catch (err) {
         console.error(err);
         setFranjasDisponibles([]);
+        toast.error("No se pudieron cargar las franjas horarias");
       }
     };
     fetchFranjas();
@@ -87,11 +93,18 @@ export function FormTurnoCliente({ onCrearTurno }) {
         console.error(err);
         setHorariosDisponibles([]);
         setHorarioSeleccionado("");
+        toast.error("No se pudieron cargar los horarios disponibles");
       }
     };
 
     fetchHorarios();
   }, [franjaSeleccionada, fechaSeleccionada, datosCliente.tipoTurno, franjasDisponibles]);
+
+  // 🔹 Validaciones
+  const validarNombre = (nombre) => /^[a-zA-Z\s]+$/.test(nombre.trim());
+  const validarApellido = (apellido) => /^[a-zA-Z\s]+$/.test(apellido.trim());
+  const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const validarTelefono = (telefono) => /^\d{8,15}$/.test(telefono.trim());
 
   // 🔹 Handlers
   const handleChange = (e) => {
@@ -100,19 +113,21 @@ export function FormTurnoCliente({ onCrearTurno }) {
 
   const handleNextStep = (e) => {
     e.preventDefault();
-    if (
-      step === 1 &&
-      (!datosCliente.nombre ||
-        !datosCliente.apellido ||
-        !datosCliente.telefono ||
-        !datosCliente.email)
-    ) {
-      return alert("Completa todos los campos antes de continuar");
+
+    if (step === 1) {
+      if (!datosCliente.nombre || !datosCliente.apellido || !datosCliente.telefono || !datosCliente.email) {
+        return toast.error("Completa todos los campos antes de continuar");
+      }
+      if (!validarNombre(datosCliente.nombre)) return toast.error("Nombre inválido");
+      if (!validarApellido(datosCliente.apellido)) return toast.error("Apellido inválido");
+      if (!validarEmail(datosCliente.email)) return toast.error("Email inválido");
+      if (!validarTelefono(datosCliente.telefono)) return toast.error("Teléfono inválido (mínimo 8 dígitos, solo números)");
     }
 
     if (step === 2 && !datosCliente.tipoTurno) {
-      return alert("Selecciona un tipo de turno");
+      return toast.error("Selecciona un tipo de turno");
     }
+
     setStep(step + 1);
   };
 
@@ -123,9 +138,10 @@ export function FormTurnoCliente({ onCrearTurno }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!fechaSeleccionada || !franjaSeleccionada || !horarioSeleccionado) {
-      return alert("Selecciona fecha, franja y horario");
-    }
+
+    if (!fechaSeleccionada) return toast.error("Selecciona una fecha");
+    if (!franjaSeleccionada) return toast.error("Selecciona una franja horaria");
+    if (!horarioSeleccionado) return toast.error("Selecciona un horario");
 
     const fechaHora = `${fechaSeleccionada}T${horarioSeleccionado}:00`;
 
@@ -138,6 +154,8 @@ export function FormTurnoCliente({ onCrearTurno }) {
       tipoTurno: datosCliente.tipoTurno,
       fechaHora,
     });
+
+    toast.success("Turno creado con éxito");
 
     // Reset
     setStep(1);
@@ -156,166 +174,191 @@ export function FormTurnoCliente({ onCrearTurno }) {
   };
 
   return (
-    <form
-      className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-2xl shadow-md"
-      style={{ backgroundColor: "#0d0d12ff", color: "black" }}
-    >
-      {/* 🔸 Paso 1: Datos del cliente */}
-      {step === 1 && (
-        <>
-          <InputField
-            type="text"
-            name="nombre"
-            placeholder="Nombre/s"
-            value={datosCliente.nombre}
-            onChange={handleChange}
-            required
-            className="text-black"
-          />
-          <InputField
-            type="text"
-            name="apellido"
-            placeholder="Apellido"
-            value={datosCliente.apellido}
-            onChange={handleChange}
-            required
-            className="text-black"
-          />
-
-          <InputField
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={datosCliente.email}
-            onChange={handleChange}
-            required
-            className="text-black"
-          />
-          
-          <InputField
-            type="tel"
-            name="telefono"
-            placeholder="Teléfono"
-            value={datosCliente.telefono}
-            onChange={handleChange}
-            required
-            className="text-black"
-          />
-          <div className="md:col-span-2 flex justify-end">
-            <ButtonCliente onClick={handleNextStep}>Siguiente</ButtonCliente>
-          </div>
-        </>
-      )}
-
-      {/* 🔸 Paso 2: Selección del tipo de turno */}
-      {step === 2 && (
-        <>
-          <div className="md:col-span-2">
-            <label className="block text-lg font-medium text-gray-100">
-              Seleccione Tipo de Turno
-            </label>
-          </div>
-          <div className="md:col-span-2">
-            <SelectorTipoTurno
-              tipos={tiposTurno}
-              seleccionado={tiposTurno.find(
-                (t) => t._id === datosCliente.tipoTurno
-              )}
-              onSelect={(tipo) =>
-                setDatosCliente((prev) => ({ ...prev, tipoTurno: tipo._id }))
-              }
-            />
-          </div>
-          <div className="md:col-span-2 flex justify-between gap-4 mt-4">
-            <ButtonCliente onClick={handlePrevStep} className="flex-1 min-w-[100px] px-3 py-2 text-sm">
-              Anterior
-            </ButtonCliente>
-            <ButtonCliente onClick={handleNextStep} className="flex-1 min-w-[100px] px-3 py-2 text-sm">
-              Siguiente
-            </ButtonCliente>
-          </div>
-        </>
-      )}
-
-      {/* 🔸 Paso 3: Fecha, franja y horario */}
-      {step === 3 && (
-        <>
-          {/* 🟡 Fecha y franja apiladas siempre */}
-          <div className="md:col-span-2 grid grid-cols-1 gap-3">
+    <>
+      <form
+        className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-2xl shadow-md"
+        style={{ backgroundColor: "#0d0d12ff", color: "black" }}
+      >
+        {/* 🔸 Paso 1: Datos del cliente */}
+        {step === 1 && (
+          <>
             <InputField
-              label="Fecha"
-              type="date"
-              name="fecha"
-              value={fechaSeleccionada}
-              onChange={(e) => setFechaSeleccionada(e.target.value)}
+              type="text"
+              name="nombre"
+              placeholder="Nombre/s"
+              value={datosCliente.nombre}
+              onChange={handleChange}
               required
               className="text-black"
             />
+            <InputField
+              type="text"
+              name="apellido"
+              placeholder="Apellido"
+              value={datosCliente.apellido}
+              onChange={handleChange}
+              required
+              className="text-black"
+            />
+            <InputField
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={datosCliente.email}
+              onChange={handleChange}
+              required
+              className="text-black"
+            />
+            <InputField
+              type="tel"
+              name="telefono"
+              placeholder="Teléfono"
+              value={datosCliente.telefono}
+              onChange={handleChange}
+              required
+              className="text-black"
+            />
+            <div className="md:col-span-2 flex justify-end">
+              <ButtonCliente onClick={handleNextStep}>Siguiente</ButtonCliente>
+            </div>
+          </>
+        )}
 
-            {fechaSeleccionada && franjasDisponibles.length > 0 ? (
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Franja horaria
-                </label>
-                <select
-                  name="franja"
-                  value={franjaSeleccionada}
-                  onChange={(e) => setFranjaSeleccionada(e.target.value)}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                >
-                  <option value="">Seleccionar franja</option>
-                  {franjasDisponibles.map((f) => (
-                    <option key={f.inicio} value={`${f.inicio}-${f.fin}`}>
-                      {f.inicio} - {f.fin}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ) : fechaSeleccionada ? (
-              <p className="text-red-600 mt-2 col-span-2">
-                No hay franjas disponibles para esta fecha
-              </p>
-            ) : null}
-          </div>
+        {/* 🔸 Paso 2: Selección del tipo de turno */}
+        {step === 2 && (
+          <>
+            <div className="md:col-span-2">
+              <label className="block text-lg font-medium text-gray-100">
+                Seleccione Tipo de Turno
+              </label>
+            </div>
+            <div className="md:col-span-2">
+              <SelectorTipoTurno
+                tipos={tiposTurno}
+                seleccionado={tiposTurno.find((t) => t._id === datosCliente.tipoTurno)}
+                onSelect={(tipo) =>
+                  setDatosCliente((prev) => ({ ...prev, tipoTurno: tipo._id }))
+                }
+              />
+            </div>
+            <div className="md:col-span-2 flex justify-between gap-4 mt-4">
+              <ButtonCliente onClick={handlePrevStep} className="flex-1 min-w-[100px] px-3 py-2 text-sm">
+                Anterior
+              </ButtonCliente>
+              <ButtonCliente onClick={handleNextStep} className="flex-1 min-w-[100px] px-3 py-2 text-sm">
+                Siguiente
+              </ButtonCliente>
+            </div>
+          </>
+        )}
 
-          {franjaSeleccionada && horariosDisponibles.length > 0 ? (
-            <div className="col-span-2 grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
-              {horariosDisponibles.map((h) => (
-                <button
-                  key={h}
-                  type="button"
-                  onClick={() => setHorarioSeleccionado(h)}
-                  className={`py-2 px-4 rounded-md text-white ${horarioSeleccionado === h
+        {/* 🔸 Paso 3: Fecha, franja y horario */}
+        {step === 3 && (
+          <>
+            <div className="md:col-span-2 grid grid-cols-1 gap-3">
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Fecha
+              </label>
+              <DatePicker
+                selected={fechaSeleccionada ? new Date(fechaSeleccionada + "T00:00") : null}
+                onChange={(date) => {
+                  if (!date) return;
+                  const yyyy = date.getFullYear();
+                  const mm = String(date.getMonth() + 1).padStart(2, "0");
+                  const dd = String(date.getDate()).padStart(2, "0");
+                  setFechaSeleccionada(`${yyyy}-${mm}-${dd}`);
+                }}
+                minDate={new Date()} // Bloquea fechas pasadas
+                filterDate={(date) => {
+                  const day = date.getDay();
+                  return day !== 0 && day !== 1; // Bloquea domingos (0) y lunes (1)
+                }}
+                placeholderText="Selecciona una fecha"
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                dateFormat="yyyy-MM-dd"
+              />
+
+              {fechaSeleccionada && franjasDisponibles.length > 0 ? (
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Franja horaria
+                  </label>
+                  <select
+                    name="franja"
+                    value={franjaSeleccionada}
+                    onChange={(e) => setFranjaSeleccionada(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  >
+                    <option value="">Seleccionar franja</option>
+                    {franjasDisponibles.map((f) => (
+                      <option key={f.inicio} value={`${f.inicio}-${f.fin}`}>
+                        {f.inicio} - {f.fin}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : fechaSeleccionada ? (
+                <div><p className="text-red-600 mt-2 col-span-2">
+                  No hay franjas disponibles para esta fecha
+                </p></div>
+                
+              ) : null}
+            </div>
+
+            {franjaSeleccionada && horariosDisponibles.length > 0 ? (
+              <div className="col-span-2 grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
+                {horariosDisponibles.map((h) => (
+                  <button
+                    key={h}
+                    type="button"
+                    onClick={() => setHorarioSeleccionado(h)}
+                    className={`py-2 px-4 rounded-md text-white ${horarioSeleccionado === h
                       ? "bg-[#c2a255]"
                       : "bg-gray-700 hover:bg-gray-600"
-                    }`}
-                >
-                  {h}
-                </button>
-              ))}
-            </div>
-          ) : franjaSeleccionada ? (
-            <p className="text-red-600 mt-2 col-span-2">
-              No hay horarios disponibles para esta franja
-            </p>
-          ) : null}
+                      }`}
+                  >
+                    {h}
+                  </button>
+                ))}
+              </div>
+            ) : franjaSeleccionada ? (
+              <p className="text-red-600 mt-2 col-span-2">
+                No hay horarios disponibles para esta franja
+              </p>
+            ) : null}
 
-          <div className="md:col-span-2 flex justify-between gap-4 mt-4">
-            <ButtonCliente onClick={handlePrevStep} className="flex-1 min-w-[100px] px-3 py-2 text-sm">
-              Anterior
-            </ButtonCliente>
-            <ButtonCliente
-              type="submit"
-              onClick={handleSubmit}
-              className="flex-1 min-w-[100px] px-3 py-2 text-sm"
-            >
-              Confirmar
-            </ButtonCliente>
-          </div>
-        </>
-      )}
-    </form>
+            <div className="md:col-span-2 flex justify-between gap-4 mt-4">
+              <ButtonCliente onClick={handlePrevStep} className="flex-1 min-w-[100px] px-3 py-2 text-sm">
+                Anterior
+              </ButtonCliente>
+              <ButtonCliente
+                type="submit"
+                onClick={handleSubmit}
+                className="flex-1 min-w-[100px] px-3 py-2 text-sm"
+              >
+                Confirmar
+              </ButtonCliente>
+            </div>
+          </>
+        )}
+      </form>
+
+      {/* 🔹 Toast container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
+    </>
   );
 }
 

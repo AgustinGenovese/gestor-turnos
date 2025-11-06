@@ -1,4 +1,3 @@
-import nodemailer from "nodemailer";
 import Turno from "../models/turno.js";
 import TipoTurno from "../models/tipoTurno.js";
 import Cliente from "../models/cliente.js";
@@ -7,10 +6,14 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc.js";
 import timezone from "dayjs/plugin/timezone.js";
 
+import { Resend } from "resend";
+
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const ZONA_ARG = "America/Argentina/Buenos_Aires"; // zona horaria del negocio
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const obtenerFranjasDisponibles = async (req, res) => {
   try {
@@ -23,8 +26,8 @@ export const obtenerFranjasDisponibles = async (req, res) => {
       return res.status(404).json({ msg: "Tipo de turno no encontrado" });
 
     const duracion = tipoTurno.duracion; // en minutos
-    const apertura = 9;
-    const cierre = 18;
+    const apertura = 10;
+    const cierre = 20;
 
     const inicioDiaLocal = dayjs.tz(fecha, ZONA_ARG).startOf("day");
     const finDiaLocal = inicioDiaLocal.endOf("day");
@@ -152,6 +155,19 @@ export const obtenerHorariosPorFranja = async (req, res) => {
   }
 };
 
+const sendConfirmationEmail = async (to, htmlContent) => {
+  try {
+    await resend.emails.send({
+      from: process.env.FROM_EMAIL, // debe estar verificado en Resend
+      to: [to],
+      subject: "Confirmación de turno - Sarkirian Barbershop",
+      html: htmlContent,
+    });
+    console.log("Correo enviado a", to);
+  } catch (err) {
+    console.error("Error enviando correo con Resend:", err);
+  }
+};
 export const crearTurno = async (req, res) => {
   try {
     const { cliente, tipoTurno, fechaHora } = req.body;
@@ -185,9 +201,7 @@ export const crearTurno = async (req, res) => {
 
     // 📌 Tipo de turno
     const tipo = await TipoTurno.findById(tipoTurno);
-    if (!tipo) {
-      return res.status(404).json({ msg: "Tipo de turno no encontrado" });
-    }
+    if (!tipo) return res.status(404).json({ msg: "Tipo de turno no encontrado" });
 
     const duracion = tipo.duracion;
     const fin = dayjs(fecha).add(duracion, "minute").toDate();
@@ -196,10 +210,7 @@ export const crearTurno = async (req, res) => {
     const solapa = await Turno.findOne({
       $and: [{ fechaHora: { $lt: fin } }, { fin: { $gt: fecha } }],
     });
-
-    if (solapa) {
-      return res.status(400).json({ msg: "Horario ocupado" });
-    }
+    if (solapa) return res.status(400).json({ msg: "Horario ocupado" });
 
     // ✅ Crear turno
     const turno = new Turno({
@@ -209,7 +220,6 @@ export const crearTurno = async (req, res) => {
       duracion,
       fin,
     });
-
     await turno.save();
 
     const turnoPopulado = await Turno.findById(turno._id)
@@ -217,39 +227,22 @@ export const crearTurno = async (req, res) => {
       .populate("tipoTurno");
 
     // 📧 Enviar email de confirmación (no bloqueante)
-    try {
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-      });
-
-      const mailOptions = {
-        from: `"Sarkirian Barbershop" <${process.env.EMAIL_USER}>`,
-        to: clienteDoc.email,
-        subject: "Confirmación de turno - Sarkirian Barbershop",
-        html: `
-          <div style="font-family: Arial, sans-serif; color: #333; padding: 16px;">
-            <h2 style="color: #c2a255;">¡Tu turno fue confirmado!</h2>
-            <p>Hola <strong>${clienteDoc.nombre}</strong>,</p>
-            <p>Gracias por reservar tu turno en <strong>Sarkirian Barbershop</strong>.</p>
-            <p><b>Fecha:</b> ${dayjs(turnoPopulado.fechaHora).tz(ZONA_ARG).format("DD/MM/YYYY")}<br/>
-               <b>Hora:</b> ${dayjs(turnoPopulado.fechaHora).tz(ZONA_ARG).format("HH:mm")} hs<br/>
-               <b>Servicio:</b> ${turnoPopulado.tipoTurno.nombre}</p>
-            <p>Por favor, verificá que tus datos sean correctos. Si necesitás modificar o cancelar tu turno, comunicate con nosotros.</p>
-            <br/>
-            <p style="font-size: 0.9rem; color: #777;">Sarkirian Barbershop © ${new Date().getFullYear()}</p>
-          </div>
-        `,
-      };
-
-      await transporter.sendMail(mailOptions);
-    } catch (err) {
-      console.error("Error enviando correo:", err);
-      // opcional: podés agregar un flag para informar al frontend que el mail falló
-    }
+    sendConfirmationEmail(
+      clienteDoc.email,
+      `
+      <div style="font-family: Arial, sans-serif; color: #333; padding: 16px;">
+        <h2 style="color: #c2a255;">¡Tu turno fue confirmado!</h2>
+        <p>Hola <strong>${clienteDoc.nombre}</strong>,</p>
+        <p>Gracias por reservar tu turno en <strong>Sarkirian Barbershop</strong>.</p>
+        <p><b>Fecha:</b> ${dayjs(turnoPopulado.fechaHora).tz(ZONA_ARG).format("DD/MM/YYYY")}<br/>
+           <b>Hora:</b> ${dayjs(turnoPopulado.fechaHora).tz(ZONA_ARG).format("HH:mm")} hs<br/>
+           <b>Servicio:</b> ${turnoPopulado.tipoTurno.nombre}</p>
+        <p>Por favor, verificá que tus datos sean correctos. Si necesitás modificar o cancelar tu turno, comunicate con nosotros.</p>
+        <br/>
+        <p style="font-size: 0.9rem; color: #777;">Sarkirian Barbershop © ${new Date().getFullYear()}</p>
+      </div>
+      `
+    );
 
     res.status(201).json({
       msg: "Turno creado correctamente",
