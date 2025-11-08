@@ -2,18 +2,21 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    port: 5173, // opcional: define el puerto de React
+    port: 5173, // puerto de desarrollo del frontend
     proxy: {
-      // redirige cualquier request a /api al backend en el puerto 3000
+      // 🔁 redirige las llamadas a /api hacia el backend Express
       '/api': {
         target: 'http://localhost:3000',
         changeOrigin: true,
         secure: false,
       },
     },
+  },
+  build: {
+    outDir: '../client/dist', // ✅ dónde generar el build para el monolito
+    emptyOutDir: true,        // limpia la carpeta antes de cada build
   },
 })
