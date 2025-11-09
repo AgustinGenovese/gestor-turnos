@@ -156,9 +156,9 @@ export function FormTurnoCliente({ onCrearTurno }) {
     });
 
     toast.success(
-      <div className="text-center">
-        <strong className="block w-full text-lg">Turno creado correctamente</strong>
-        <span className="block w-full text-sm text-gray-300">
+      <div className="text-center mx-auto">
+        <strong className="block text-lg">Turno creado correctamente</strong>
+        <span className="text-sm text-gray-300">
           Verifique su correo electrónico.
         </span>
       </div>,
