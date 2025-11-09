@@ -5,9 +5,9 @@ import { API_URL } from "../../api/fetch.js"; // <-- importamos la URL del backe
 
 export default function TiposTurnosAdmin() {
   const [tipos, setTipos] = useState([]);
-  const [nuevo, setNuevo] = useState({ nombre: "", duracion: "" });
+  const [nuevo, setNuevo] = useState({ nombre: "", duracion: "", precio: "" });
   const [editandoId, setEditandoId] = useState(null);
-  const [editData, setEditData] = useState({ nombre: "", duracion: "" });
+  const [editData, setEditData] = useState({ nombre: "", duracion: "", precio: "" });
 
   useEffect(() => {
     obtenerTipos();
@@ -33,7 +33,7 @@ export default function TiposTurnosAdmin() {
       });
       const data = await res.json();
       setTipos([...tipos, data]);
-      setNuevo({ nombre: "", duracion: "" });
+      setNuevo({ nombre: "", duracion: "", precio: "" });
     } catch {
       alert("Error al crear tipo de turno");
     }
@@ -74,6 +74,8 @@ export default function TiposTurnosAdmin() {
     setEditData({ nombre: "", duracion: "" });
   };
 
+  console.log("hola")
+
   return (
     <div className="p-6 bg-gray-50 rounded-2xl shadow-md">
       <h1 className="text-2xl font-bold mb-4 text-gray-800">Tipos de Turnos</h1>
@@ -88,6 +90,16 @@ export default function TiposTurnosAdmin() {
           className="border border-gray-300 p-2 rounded w-full"
           required
 
+        />
+        <input
+          type="number"
+          placeholder="Precio ($)"
+          value={nuevo.precio}
+          onChange={(e) => setNuevo({ ...nuevo, precio: Number(e.target.value) })}
+          className="border border-gray-300 p-2 rounded w-full sm:w-32"
+          step="0.01"
+          min="0"
+          required
         />
         <input
           type="number"
@@ -112,6 +124,7 @@ export default function TiposTurnosAdmin() {
             <tr>
               <th className="px-4 py-2 text-left">Nombre</th>
               <th className="px-4 py-2 text-left">Duración (min)</th>
+              <th className="px-4 py-2 text-left">Precio ($)</th>
               <th className="px-4 py-2 text-center">Acciones</th>
             </tr>
           </thead>
@@ -131,6 +144,7 @@ export default function TiposTurnosAdmin() {
                         required
                       />
                     </td>
+
                     <td className="px-4 py-2">
                       <input
                         type="number"
@@ -144,6 +158,19 @@ export default function TiposTurnosAdmin() {
                         required
                       />
                     </td>
+
+                    <td className="px-4 py-2">
+                      <input
+                        type="number"
+                        value={editData.precio}
+                        onChange={(e) => setEditData({ ...editData, precio: Number(e.target.value) })}
+                        className="border p-2 rounded w-full"
+                        step="0.01"
+                        min="0"
+                        required
+                      />
+                    </td>
+
                     <td className="px-4 py-2 flex justify-center gap-2">
                       <button
                         onClick={() => handleGuardar(tipo._id)}
@@ -163,6 +190,7 @@ export default function TiposTurnosAdmin() {
                   <>
                     <td className="px-4 py-2">{tipo.nombre}</td>
                     <td className="px-4 py-2">{tipo.duracion}</td>
+                    <td className="px-4 py-2">{tipo.precio}</td>
                     <td className="px-4 py-2 flex justify-center gap-2">
                       <button
                         onClick={() => iniciarEdicion(tipo)}

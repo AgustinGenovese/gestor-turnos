@@ -11,12 +11,16 @@ export function SelectorTipoTurno({ tipos, onSelect, seleccionado }) {
             className={`p-3 rounded-lg border text-left shadow-sm transition-all
               ${activo
                 ? "border-[#c2a255] bg-[#c2a255]/10 shadow-md text-white"
-                : "border-gray-200 hover:border-[#c2a255]/50"
+                : "border-gray-700 hover:border-[#c2a255]/50"
               }
             `}
           >
-            <h3 className="font-medium text-gray-300">{tipo.nombre}</h3>
-            <p className="text-sm text-gray-500">{tipo.duracion} min</p>
+            <h3 className="font-medium text-gray-200 mb-1">{tipo.nombre}</h3>
+
+            <div className="flex justify-between text-sm text-gray-400">
+              <span>⏱ {tipo.duracion} min</span>
+              <span >💲 {tipo.precio}</span>
+            </div>
           </button>
         );
       })}
