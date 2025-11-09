@@ -20,9 +20,7 @@ export default function TurnosPage() {
       toast.success(
         <div className="text-center">
           <strong className="block text-lg">Turno creado correctamente</strong>
-          <span className="text-sm text-gray-300">
-            Verifique su correo electrónico.
-          </span>
+          <span style={{ color: '#D1D5DB' }}>Verifique su correo electrónico.</span>
         </div>,
         {
           duration: 5000,
