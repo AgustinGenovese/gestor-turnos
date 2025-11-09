@@ -155,8 +155,6 @@ export function FormTurnoCliente({ onCrearTurno }) {
       fechaHora,
     });
 
-    toast.success("Turno creado con éxito");
-
     // Reset
     setStep(1);
     setDatosCliente({
@@ -303,7 +301,7 @@ export function FormTurnoCliente({ onCrearTurno }) {
                 <div><p className="text-red-600 mt-2 col-span-2">
                   No hay franjas disponibles para esta fecha
                 </p></div>
-                
+
               ) : null}
             </div>
 

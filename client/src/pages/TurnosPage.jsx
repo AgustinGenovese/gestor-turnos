@@ -29,7 +29,6 @@ export default function TurnosPage() {
         }
       );
 
-
     } catch (err) {
       console.error(err);
       alert("Error al crear turno");
