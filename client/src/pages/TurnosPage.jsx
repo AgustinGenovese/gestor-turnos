@@ -1,6 +1,5 @@
 import { FormTurnoCliente } from "../components/forms/FormTurnoCliente";
 import { API_URL } from "../api/fetch"; // <-- importamos la URL del backend
-import toast, { Toaster } from "react-hot-toast";
 
 export default function TurnosPage() {
   const crearTurno = async (datos) => {
@@ -17,18 +16,6 @@ export default function TurnosPage() {
         return alert(errorData.msg || "Error al crear turno");
       }
 
-      toast.success(
-        <div className="text-center">
-          <strong className="block text-lg">Turno creado correctamente</strong>
-          <span className="text-sm text-gray-900">
-            Verifique su correo electrónico.
-          </span>
-        </div>,
-        {
-          duration: 5000,
-        }
-      );
-
     } catch (err) {
       console.error(err);
       alert("Error al crear turno");
@@ -38,9 +25,6 @@ export default function TurnosPage() {
   return (
     <div className="min-h-screen text-gray-100 flex flex-col items-center p-6"
       style={{ backgroundColor: '#0d0d12ff' }}>
-
-      {/* TOASTS */}
-      <Toaster position="top-center" reverseOrder={false} />
 
       {/* HEADER */}
       <header

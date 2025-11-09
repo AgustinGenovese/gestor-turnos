@@ -155,12 +155,13 @@ export function FormTurnoCliente({ onCrearTurno }) {
       fechaHora,
     });
 
-    toast.success(<div className="text-center">
-          <strong className="block text-lg">Turno creado correctamente</strong>
-          <span className="text-sm text-gray-300">
-            Verifique su correo electrónico.
-          </span>
-        </div>,
+    toast.success(
+      <div className="text-center">
+        <strong className="block text-lg">Turno creado correctamente</strong>
+        <span className="text-sm text-gray-300">
+          Verifique su correo electrónico.
+        </span>
+      </div>,
       {
         autoClose: 5000 // 5000ms = 5 segundos
       });
