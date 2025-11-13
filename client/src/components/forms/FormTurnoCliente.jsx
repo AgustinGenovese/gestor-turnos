@@ -311,7 +311,7 @@ export function FormTurnoCliente({ onCrearTurno }) {
                 </div>
               ) : fechaSeleccionada ? (
                 <div><p className="text-red-600 mt-2 col-span-2">
-                  No hay franjas disponibles para esta fecha
+                  No hay horarios disponibles para esta fecha
                 </p></div>
 
               ) : null}

@@ -53,6 +53,15 @@ export const obtenerFranjasDisponibles = async (req, res) => {
       const franjaInicio = inicioDiaLocal.hour(h).minute(0).second(0);
       const franjaFin = franjaInicio.add(1, "hour");
 
+      // 🔹 Hora actual en Argentina
+      const ahora = dayjs().tz(ZONA_ARG);
+
+      // 🔹 Si la fecha es hoy y la franja ya pasó, saltar
+      const esHoy = franjaInicio.isSame(ahora, "day");
+      if (esHoy && franjaFin.isBefore(ahora)) {
+        continue; // ⛔ saltar esta franja completa
+      }
+
       let hayBloqueLibre = false;
       let cursor = franjaInicio;
 
@@ -134,6 +143,16 @@ export const obtenerHorariosPorFranja = async (req, res) => {
 
       if (ultima === "true" && bloqueFin.isAfter(franjaFin)) break;
 
+      // 🔹 Obtener la hora actual en Argentina
+      const ahora = dayjs().tz(ZONA_ARG);
+
+      // 🔹 Evitar horarios pasados si es el mismo día
+      const esHoy = bloqueInicio.isSame(ahora, "day");
+      if (esHoy && bloqueInicio.isBefore(ahora)) {
+        cursor = cursor.add(5, "minute");
+        continue; // ⛔ Saltar horarios anteriores a la hora actual
+      }
+
       const choca = turnosOcupados.some((t) => {
         const turnoInicio = dayjs(t.fechaHora);
         const turnoFin = dayjs(t.fin);
@@ -157,6 +176,7 @@ export const obtenerHorariosPorFranja = async (req, res) => {
 
 const sendConfirmationEmail = async (to, htmlContent) => {
   try {
+
     await resend.emails.send({
       from: process.env.FROM_EMAIL, // debe estar verificado en Resend
       to: [to],
@@ -166,8 +186,10 @@ const sendConfirmationEmail = async (to, htmlContent) => {
     console.log("Correo enviado a", to);
   } catch (err) {
     console.error("Error enviando correo con Resend:", err);
+    if (err.response) console.error("Detalle:", err.response.data);
   }
 };
+
 export const crearTurno = async (req, res) => {
   try {
     const { cliente, tipoTurno, fechaHora } = req.body;
