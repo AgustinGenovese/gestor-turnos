@@ -326,14 +326,31 @@ export const obtenerTurnoId = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Buscar el turno por ID
-    const turno = await Turno.findById(id);
+    // Buscar el turno y popular solo el nombre del tipo de turno
+    const turno = await Turno.findById(id).populate("tipoTurno", "nombre");
 
     if (!turno) {
       return res.status(404).json({ msg: "No se encontró el turno solicitado" });
     }
 
-    res.json(turno);
+    // Formatear fecha y hora
+    const fechaObj = new Date(turno.fechaHora);
+    const fecha = fechaObj.toLocaleDateString("es-AR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    const horario = fechaObj.toLocaleTimeString("es-AR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    // Enviar solo los datos necesarios
+    res.json({
+      tipoTurno: turno.tipoTurno?.nombre || "Sin tipo",
+      fecha,
+      horario,
+    });
   } catch (error) {
     console.error("Error al obtener turno por ID:", error);
     res.status(500).json({ msg: "Error al obtener el turno" });

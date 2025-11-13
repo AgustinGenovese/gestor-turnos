@@ -39,7 +39,6 @@ export default function CancelarTurnoPage() {
       const res = await fetch(`${API_URL}/api/turnos/${id}`, {
         method: "DELETE",
       });
-
       const data = await res.json();
 
       if (res.ok) {
@@ -52,7 +51,6 @@ export default function CancelarTurnoPage() {
           </div>,
           { autoClose: 5000 }
         );
-        // 🔹 Limpiamos el turno y mostramos solo el mensaje final
         setTurno(null);
         setMensaje("Turno cancelado correctamente ✅");
       } else {
@@ -99,7 +97,7 @@ export default function CancelarTurnoPage() {
               {mensaje}
               <br />
               <span className="text-sm text-gray-400 block mt-2">
-                <strong>{turno.tipoTurno}</strong> - {turno.nombre}
+                <strong>{turno.tipoTurno}</strong>
                 <br />
                 {turno.fecha} a las {turno.horario}
               </span>
