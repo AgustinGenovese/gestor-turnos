@@ -33,17 +33,6 @@ export default function CancelarTurnoPage() {
   const eliminarTurno = async () => {
     if (!turno) return;
 
-    const confirmar = window.confirm(
-      `¿Seguro que desea cancelar el turno de ${turno.tipoTurno} para ${turno.nombre}? 
-Horario: ${turno.horario} 
-Fecha: ${turno.fecha}`
-    );
-
-    if (!confirmar) {
-      setMensaje("Cancelación abortada ❎");
-      return;
-    }
-
     try {
       const res = await fetch(`${API_URL}/api/turnos/${id}`, {
         method: "DELETE",
@@ -114,7 +103,7 @@ Fecha: ${turno.fecha}`
               onClick={eliminarTurno}
               className="mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
             >
-              Cancelar turno
+              Confirmar cancelación
             </button>
           </>
         ) : (
