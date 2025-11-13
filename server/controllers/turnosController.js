@@ -267,7 +267,7 @@ export const crearTurno = async (req, res) => {
 
     <div style="margin: 24px 0;">
       <a 
-        href="https://sarkirianbarbershop.com/cancelar/${turnoPopulado._id}" 
+        href="https://sarkirian-barberia-unnyg.ondigitalocean.app/cancelar/${turnoPopulado._id}" 
         style="
           background-color: #c2a255;
           color: #fff;
