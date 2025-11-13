@@ -14,8 +14,6 @@ import { AppLayout } from "../components/AppLayout.jsx";
 export default function AppRouter() {
   const { autenticado } = useAuth();
 
-  if (autenticado === null) return <p>Cargando sesión...</p>;
-
   return (
     <BrowserRouter>
       <Routes>
