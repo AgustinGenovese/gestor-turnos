@@ -259,11 +259,10 @@ export const crearTurno = async (req, res) => {
     <p>
       <b>Fecha:</b> ${dayjs(turnoPopulado.fechaHora).tz(ZONA_ARG).format("DD/MM/YYYY")}<br/>
       <b>Hora:</b> ${dayjs(turnoPopulado.fechaHora).tz(ZONA_ARG).format("HH:mm")} hs<br/>
-      <b>Servicio:</b> ${turnoPopulado.tipoTurno.nombre}
+      <b>Servicio:</b> ${turnoPopulado.tipoTurno.nombre}<br/>
+      <p>Por favor, verificá que tus datos sean correctos.</p>
+      <p>Si necesitás cancelar tu turno, podés hacerlo directamente desde el siguiente enlace:</p>
     </p>
-
-    <p>Por favor, verificá que tus datos sean correctos.</p>
-    <p>Si necesitás cancelar tu turno, podés hacerlo directamente desde el siguiente enlace:</p>
 
     <div style="margin: 24px 0;">
       <a 
