@@ -16,8 +16,6 @@ router.post("/", crearTurno);
 // Obtener todos los turnos
 router.get("/", obtenerTurnos);
 
-router.get("/:id", obtenerTurnoId);
-
 // Obtener franjas disponibles (1 hora)
 router.get("/franjas", obtenerFranjasDisponibles);
 
@@ -26,5 +24,7 @@ router.get("/horarios", obtenerHorariosPorFranja);
 
 // Eliminar turno
 router.delete("/:id", eliminarTurno);
+
+router.get("/:id", obtenerTurnoId);
 
 export default router;
