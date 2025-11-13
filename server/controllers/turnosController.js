@@ -322,6 +322,24 @@ export const obtenerTurnos = async (req, res) => {
   }
 };
 
+export const obtenerTurnoId = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Buscar el turno por ID
+    const turno = await Turno.findById(id);
+
+    if (!turno) {
+      return res.status(404).json({ msg: "No se encontró el turno solicitado" });
+    }
+
+    res.json(turno);
+  } catch (error) {
+    console.error("Error al obtener turno por ID:", error);
+    res.status(500).json({ msg: "Error al obtener el turno" });
+  }
+};
+
 export const eliminarTurno = async (req, res) => {
   try {
     const { id } = req.params;
