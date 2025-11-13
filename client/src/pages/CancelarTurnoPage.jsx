@@ -19,10 +19,12 @@ export default function CancelarTurnoPage() {
           setTurno(data);
           setMensaje("¿Seguro que desea cancelar este turno?");
         } else {
+          setTurno(null);
           setMensaje(data.msg || "No se pudo obtener la información del turno ❌");
         }
       } catch (error) {
         console.error("Error al obtener turno:", error);
+        setTurno(null);
         setMensaje("Error al conectar con el servidor ❌");
       }
     };
@@ -50,6 +52,8 @@ export default function CancelarTurnoPage() {
           </div>,
           { autoClose: 5000 }
         );
+        // 🔹 Limpiamos el turno y mostramos solo el mensaje final
+        setTurno(null);
         setMensaje("Turno cancelado correctamente ✅");
       } else {
         toast.error(
@@ -60,6 +64,7 @@ export default function CancelarTurnoPage() {
             </span>
           </div>
         );
+        setTurno(null);
         setMensaje("No se pudo eliminar el turno ❌");
       }
     } catch (error) {
@@ -72,6 +77,7 @@ export default function CancelarTurnoPage() {
           </span>
         </div>
       );
+      setTurno(null);
       setMensaje("Error de conexión con el servidor ❌");
     }
   };
