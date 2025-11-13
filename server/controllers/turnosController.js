@@ -331,20 +331,27 @@ export const obtenerTurnoId = async (req, res) => {
       return res.status(404).json({ msg: "No se encontró el turno solicitado" });
     }
 
-    // fechaHora viene como string ISO local o UTC
+    // Convertir a horario de Argentina (UTC-3)
     const fechaObj = new Date(turno.fechaHora);
 
-    // Obtenemos partes sin cambiar zona horaria
-    const año = fechaObj.getFullYear();
-    const mes = String(fechaObj.getMonth() + 1).padStart(2, "0");
-    const dia = String(fechaObj.getDate()).padStart(2, "0");
-    const horas = String(fechaObj.getHours()).padStart(2, "0");
-    const minutos = String(fechaObj.getMinutes()).padStart(2, "0");
+    const fecha = fechaObj.toLocaleDateString("es-AR", {
+      timeZone: "America/Argentina/Buenos_Aires",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+
+    const horario = fechaObj.toLocaleTimeString("es-AR", {
+      timeZone: "America/Argentina/Buenos_Aires",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
 
     res.json({
       tipoTurno: turno.tipoTurno?.nombre || "Sin tipo",
-      fecha: `${dia}/${mes}/${año}`,
-      horario: `${horas}:${minutos}`,
+      fecha,
+      horario,
     });
   } catch (error) {
     console.error("Error al obtener turno por ID:", error);
