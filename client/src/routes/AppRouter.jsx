@@ -2,7 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 
 import TurnosPage from "../pages/TurnosPage.jsx";
+import CancelarTurnoPage from "../pages/CancelarTurnoPage";
 import Login from "../pages/Login.jsx";
+
 import CalendarAdmin from "../pages/admin/CalendarAdmin.jsx";
 import ClientesAdmin from "../pages/admin/ClientesAdmin.jsx"
 import TiposTurnosAdmin from "../pages/admin/TiposTurnosAdmin.jsx"
@@ -19,10 +21,12 @@ export default function AppRouter() {
       <Routes>
         {/* Rutas públicas */}
         <Route path="/turnos" element={<TurnosPage />} />
+        <Route path="/cancelar/:id" element={<CancelarTurnoPage />} />
         <Route
           path="/login"
           element={!autenticado ? <Login /> : <Navigate to="/CalendarAdmin" />}
         />
+        
 
         {/* Rutas privadas dentro del layout */}
         <Route

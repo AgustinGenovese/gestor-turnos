@@ -252,18 +252,37 @@ export const crearTurno = async (req, res) => {
     sendConfirmationEmail(
       clienteDoc.email,
       `
-      <div style="font-family: Arial, sans-serif; color: #333; padding: 16px;">
-        <h2 style="color: #c2a255;">¡Tu turno fue confirmado!</h2>
-        <p>Hola <strong>${clienteDoc.nombre}</strong>,</p>
-        <p>Gracias por reservar tu turno en <strong>Sarkirian Barbershop</strong>.</p>
-        <p><b>Fecha:</b> ${dayjs(turnoPopulado.fechaHora).tz(ZONA_ARG).format("DD/MM/YYYY")}<br/>
-           <b>Hora:</b> ${dayjs(turnoPopulado.fechaHora).tz(ZONA_ARG).format("HH:mm")} hs<br/>
-           <b>Servicio:</b> ${turnoPopulado.tipoTurno.nombre}</p>
-        <p>Por favor, verificá que tus datos sean correctos. Si necesitás modificar o cancelar tu turno, comunicate con nosotros.</p>
-        <br/>
-        <p style="font-size: 0.9rem; color: #777;">Sarkirian Barbershop © ${new Date().getFullYear()}</p>
-      </div>
-      `
+  <div style="font-family: Arial, sans-serif; color: #333; padding: 16px;">
+    <h2 style="color: #c2a255;">¡Tu turno fue confirmado!</h2>
+    <p>Hola <strong>${clienteDoc.nombre}</strong>,</p>
+    <p>Gracias por reservar tu turno en <strong>Sarkirian Barbershop</strong>.</p>
+    <p>
+      <b>Fecha:</b> ${dayjs(turnoPopulado.fechaHora).tz(ZONA_ARG).format("DD/MM/YYYY")}<br/>
+      <b>Hora:</b> ${dayjs(turnoPopulado.fechaHora).tz(ZONA_ARG).format("HH:mm")} hs<br/>
+      <b>Servicio:</b> ${turnoPopulado.tipoTurno.nombre}
+    </p>
+
+    <p>Por favor, verificá que tus datos sean correctos.</p>
+    <p>Si necesitás cancelar tu turno, podés hacerlo directamente desde el siguiente enlace:</p>
+
+    <div style="margin: 24px 0;">
+      <a 
+        href="https://sarkirianbarbershop.com/cancelar/${turnoPopulado._id}" 
+        style="
+          background-color: #c2a255;
+          color: #fff;
+          padding: 12px 20px;
+          border-radius: 8px;
+          text-decoration: none;
+          font-weight: bold;
+        ">
+        Cancelar turno
+      </a>
+    </div>
+
+    <p style="font-size: 0.9rem; color: #777;">Sarkirian Barbershop © ${new Date().getFullYear()}</p>
+  </div>
+  `
     );
 
     res.status(201).json({
