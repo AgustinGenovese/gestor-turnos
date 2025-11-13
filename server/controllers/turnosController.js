@@ -326,36 +326,32 @@ export const obtenerTurnoId = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Buscar el turno y popular solo el nombre del tipo de turno
     const turno = await Turno.findById(id).populate("tipoTurno", "nombre");
-
     if (!turno) {
       return res.status(404).json({ msg: "No se encontró el turno solicitado" });
     }
 
-    // Formatear fecha y hora
+    // fechaHora viene como string ISO local o UTC
     const fechaObj = new Date(turno.fechaHora);
-    const fecha = fechaObj.toLocaleDateString("es-AR", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
-    const horario = fechaObj.toLocaleTimeString("es-AR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
 
-    // Enviar solo los datos necesarios
+    // Obtenemos partes sin cambiar zona horaria
+    const año = fechaObj.getFullYear();
+    const mes = String(fechaObj.getMonth() + 1).padStart(2, "0");
+    const dia = String(fechaObj.getDate()).padStart(2, "0");
+    const horas = String(fechaObj.getHours()).padStart(2, "0");
+    const minutos = String(fechaObj.getMinutes()).padStart(2, "0");
+
     res.json({
       tipoTurno: turno.tipoTurno?.nombre || "Sin tipo",
-      fecha,
-      horario,
+      fecha: `${dia}/${mes}/${año}`,
+      horario: `${horas}:${minutos}`,
     });
   } catch (error) {
     console.error("Error al obtener turno por ID:", error);
     res.status(500).json({ msg: "Error al obtener el turno" });
   }
 };
+
 
 export const eliminarTurno = async (req, res) => {
   try {
