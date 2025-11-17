@@ -5,6 +5,9 @@ import { SelectorTipoTurno } from "../UI/SelectorTipoTurno.jsx";
 import { API_URL } from "../../api/fetch.js";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { registerLocale } from "react-datepicker";
+import es from "date-fns/locale/es";
+registerLocale("es", es);
 
 // 🔹 Importar Toastify
 import { ToastContainer, toast } from "react-toastify";
@@ -283,6 +286,7 @@ export function FormTurnoCliente({ onCrearTurno }) {
                   const day = date.getDay();
                   return day !== 0 && day !== 1; // Bloquea domingos (0) y lunes (1)
                 }}
+                locale="es"
                 placeholderText="Selecciona una fecha"
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
