@@ -8,6 +8,7 @@ import Login from "../pages/Login.jsx";
 import CalendarAdmin from "../pages/admin/CalendarAdmin.jsx";
 import ClientesAdmin from "../pages/admin/ClientesAdmin.jsx"
 import TiposTurnosAdmin from "../pages/admin/TiposTurnosAdmin.jsx"
+import CobrosAdmin from "../pages/admin/CobrosAdmin.jsx";
 
 import { AppLayout } from "../components/AppLayout.jsx";
 
@@ -24,7 +25,7 @@ export default function AppRouter() {
           path="/login"
           element={!autenticado ? <Login /> : <Navigate to="/CalendarAdmin" />}
         />
-        
+
 
         {/* Rutas privadas dentro del layout */}
         <Route
@@ -33,6 +34,7 @@ export default function AppRouter() {
           <Route path="/CalendarAdmin" element={<CalendarAdmin />} />
           <Route path="/ClientesAdmin" element={<ClientesAdmin />} />
           <Route path="/TiposTurnosAdmin" element={<TiposTurnosAdmin />} />
+          <Route path="/CobrosAdmin" element={<CobrosAdmin />} /> 
           {/* Podés agregar más páginas protegidas aquí */}
         </Route>
 

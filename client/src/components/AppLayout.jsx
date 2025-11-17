@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Calendar, Users, LogOut, Menu, X, Wrench } from "lucide-react";
+import { Calendar, Users, LogOut, Menu, X, Wrench, DollarSign } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 
 export function AppLayout() {
@@ -13,6 +13,7 @@ export function AppLayout() {
     { name: "Calendario", path: "/CalendarAdmin", icon: <Calendar size={20} /> },
     { name: "Clientes", path: "/ClientesAdmin", icon: <Users size={20} /> },
     { name: "Tipos de Turnos", path: "/TiposTurnosAdmin", icon: <Wrench size={20} /> },
+    { name: "Cobros", path: "/CobrosAdmin", icon: <DollarSign size={20} /> },
 
   ];
 
