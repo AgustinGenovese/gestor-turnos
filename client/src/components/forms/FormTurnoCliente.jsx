@@ -104,10 +104,25 @@ export function FormTurnoCliente({ onCrearTurno }) {
   }, [franjaSeleccionada, fechaSeleccionada, datosCliente.tipoTurno, franjasDisponibles]);
 
   // 🔹 Validaciones
-  const validarNombre = (nombre) => /^[a-zA-Z\s]+$/.test(nombre.trim());
-  const validarApellido = (apellido) => /^[a-zA-Z\s]+$/.test(apellido.trim());
-  const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-  const validarTelefono = (telefono) => /^\d{8,15}$/.test(telefono.trim());
+  const validarNombre = (nombre) => /^[\p{L}\s]{1,50}$/u.test(nombre.trim());
+  const validarApellido = (apellido) => /^[\p{L}\s]{1,50}$/u.test(apellido.trim());
+  const validarEmail = (email) => {
+    const trimmed = email.trim();
+    return (
+      /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(trimmed) &&
+      trimmed.length <= 150
+    );
+  };
+
+  const validarTelefono = (telefono) => {
+    const t = telefono.trim();
+
+    const regex = /^\+?[0-9 ]+$/;
+    const soloDigitos = t.replace(/\s/g, ''); // quitar espacios para contar
+
+    return regex.test(t) && soloDigitos.length >= 8 && soloDigitos.length <= 15;
+  };
+
 
   // 🔹 Handlers
   const handleChange = (e) => {
