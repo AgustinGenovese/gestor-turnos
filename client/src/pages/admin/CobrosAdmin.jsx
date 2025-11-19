@@ -35,7 +35,7 @@ export default function CobrosAdminPage() {
       if (c.metodoPago === "efectivo") {
         return sum + monto;
       } else {
-        return sum + monto * 0.85;
+        return sum + monto * 0.90;
       }
     }, 0);
 
@@ -145,7 +145,7 @@ export default function CobrosAdminPage() {
               if (nuevo.tipoTurnoId) {
                 const seleccionado = tiposTurno.find(t => t._id === nuevo.tipoTurnoId);
                 if (seleccionado) {
-                  monto = metodo === "efectivo" ? seleccionado.precio * 0.85 : seleccionado.precio;
+                  monto = metodo === "efectivo" ? seleccionado.precio * 0.90 : seleccionado.precio;
                 }
               }
 
@@ -156,8 +156,7 @@ export default function CobrosAdminPage() {
           >
             <option value="">Método</option>
             <option value="efectivo">Efectivo</option>
-            <option value="transferencia">Transferencia</option>
-            <option value="debito">Débito</option>
+            <option value="Tarjeta">Tarjeta</option>
           </select>
 
           {/* Tipo de turno */}
@@ -168,7 +167,7 @@ export default function CobrosAdminPage() {
               const seleccionado = tiposTurno.find(t => t._id === id);
 
               if (seleccionado) {
-                const monto = nuevo.metodoPago === "efectivo" ? seleccionado.precio * 0.85 : seleccionado.precio;
+                const monto = nuevo.metodoPago === "efectivo" ? seleccionado.precio * 0.90 : seleccionado.precio;
 
                 setNuevo({
                   ...nuevo,
