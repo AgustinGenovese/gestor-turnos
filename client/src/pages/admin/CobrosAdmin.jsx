@@ -284,7 +284,7 @@ export default function CobrosAdminPage() {
       {/* TOTAL SIN GASTO BANCARIO */}
       <div className="mb-6 p-4 bg-white rounded-xl shadow border border-gray-200">
         <h2 className="text-xl font-semibold text-gray-700">
-          Total sin gasto bancario:{" "}
+          Total neto:{" "}
           <span className="text-blue-600">
             ${totalSinGasto.toFixed(2)}
           </span>
