@@ -74,8 +74,6 @@ export default function TiposTurnosAdmin() {
     setEditData({ nombre: "", duracion: "" });
   };
 
-  console.log("hola")
-
   return (
     <div className="p-6 bg-gray-50 rounded-2xl shadow-md">
       <h1 className="text-2xl font-bold mb-4 text-gray-800">Tipos de Turnos</h1>

@@ -9,6 +9,7 @@ import turnosRoutes from "./routes/turnos.js";
 import clientesRoutes from "./routes/clientes.js";
 import tipoTurnoRoutes from "./routes/tiposTurno.js";
 import usuariosRoutes from "./routes/usuarios.js";
+import cobrosRoutes from "./routes/cobros.js";
 import authRoutes from "./routes/authRoutes.js";
 
 dotenv.config();
@@ -43,6 +44,7 @@ app.use("/api/turnos", turnosRoutes);
 app.use("/api/clientes", clientesRoutes);
 app.use("/api/tiposTurno", tipoTurnoRoutes);
 app.use("/api/usuarios", usuariosRoutes);
+app.use("/api/cobros", cobrosRoutes);
 app.use("/api/auth", authRoutes);
 
 // --- FRONTEND (React) ---
