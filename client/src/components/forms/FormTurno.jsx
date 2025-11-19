@@ -13,6 +13,19 @@ export function FormTurno({ onCrearTurno }) {
   const [horariosDisponibles, setHorariosDisponibles] = useState([]);
   const [horarioSeleccionado, setHorarioSeleccionado] = useState("");
 
+  // 🔹 Validaciones
+  const validarNombre = (nombre) => /^[\p{L}\s]{1,50}$/u.test(nombre.trim());
+  const validarEmail = (email) => {
+    const trimmed = email.trim();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(trimmed) && trimmed.length <= 150;
+  };
+  const validarTelefono = (telefono) => {
+    const t = telefono.trim();
+    const regex = /^\+?[0-9 ]+$/;
+    const soloDigitos = t.replace(/\s/g, '');
+    return regex.test(t) && soloDigitos.length >= 8 && soloDigitos.length <= 15;
+  };
+
   // 🔹 Cargar tipos de turno
   useEffect(() => {
     const fetchTiposTurno = async () => {
@@ -88,8 +101,16 @@ export function FormTurno({ onCrearTurno }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!fechaSeleccionada || !franjaSeleccionada || !horarioSeleccionado || !datosCliente.tipoTurno || !datosCliente.telefono) {
+    
+     // 🔹 Validaciones
+    if (!datosCliente.nombre || !datosCliente.email || !datosCliente.telefono || !datosCliente.tipoTurno) {
       return alert("Completa todos los campos");
+    }
+    if (!validarNombre(datosCliente.nombre)) return alert("Nombre inválido (máximo 50 caracteres, solo letras y espacios)");
+    if (!validarEmail(datosCliente.email)) return alert("Email inválido");
+    if (!validarTelefono(datosCliente.telefono)) return alert("Teléfono inválido (mínimo 8, máximo 15 dígitos, permite + y espacios)");
+    if (!fechaSeleccionada || !franjaSeleccionada || !horarioSeleccionado) {
+      return alert("Selecciona fecha, franja y horario");
     }
 
     const fechaHora = `${fechaSeleccionada}T${horarioSeleccionado}:00`;
