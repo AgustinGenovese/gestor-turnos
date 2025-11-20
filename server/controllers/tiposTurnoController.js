@@ -1,10 +1,12 @@
 import TipoTurno from "../models/tipoTurno.js";
 
+// ✅ Crear un tipo de turno
 export const crearTipoTurno = async (req, res) => {
   try {
-    const { nombre, duracion, precio } = req.body;
+    const { nombre, duracion, precio, categoria } = req.body;
 
-    if (!nombre || !duracion || precio === undefined) {
+    // Validación de campos obligatorios
+    if (!nombre || !duracion || precio === undefined || !categoria) {
       return res.status(400).json({ error: "Faltan datos obligatorios" });
     }
 
@@ -12,7 +14,7 @@ export const crearTipoTurno = async (req, res) => {
       return res.status(400).json({ error: "El precio no puede ser negativo" });
     }
 
-    const nuevo = new TipoTurno({ nombre, duracion, precio });
+    const nuevo = new TipoTurno({ nombre, duracion, precio, categoria });
     await nuevo.save();
     res.status(201).json(nuevo);
   } catch (error) {
@@ -20,27 +22,36 @@ export const crearTipoTurno = async (req, res) => {
   }
 };
 
-
+// ✅ Obtener tipos de turno
 export const obtenerTiposTurno = async (req, res) => {
   try {
-    const tipos = await TipoTurno.find(); // trae todos los documentos
+    const tipos = await TipoTurno.find().sort({
+      categoria: -1, // primero categoría (desc)
+      nombre: 1      // dentro de cada categoría, orden alfabético asc
+    });
+
     res.json(tipos);
   } catch (error) {
     res.status(500).json({ error: "Error al obtener tipos de turno" });
   }
 };
 
+
+
 // ✅ Actualizar un tipo de turno
 export const actualizarTipoTurno = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Validación del precio
+    // Validación del precio si viene incluido
     if (req.body.precio !== undefined && req.body.precio < 0) {
       return res.status(400).json({ error: "El precio no puede ser negativo" });
     }
 
-    const actualizado = await TipoTurno.findByIdAndUpdate(id, req.body, { new: true });
+    const actualizado = await TipoTurno.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
+
     if (!actualizado) {
       return res.status(404).json({ error: "Tipo de turno no encontrado" });
     }
@@ -51,15 +62,16 @@ export const actualizarTipoTurno = async (req, res) => {
   }
 };
 
-
 // ✅ Eliminar un tipo de turno
 export const eliminarTipoTurno = async (req, res) => {
   try {
     const { id } = req.params;
     const eliminado = await TipoTurno.findByIdAndDelete(id);
+
     if (!eliminado) {
       return res.status(404).json({ error: "Tipo de turno no encontrado" });
     }
+
     res.json({ mensaje: "Tipo de turno eliminado correctamente" });
   } catch (error) {
     res.status(500).json({ error: "Error al eliminar tipo de turno" });
