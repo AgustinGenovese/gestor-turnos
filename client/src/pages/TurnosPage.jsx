@@ -37,7 +37,7 @@ export default function TurnosPage() {
             className="w-30 h-20 object-cover rounded-full"
           />
           <h1 className="text-3xl font-bold tracking-tight drop-shadow-sm ml-4">
-            Sarkirian Barbershop
+            Sarkirian Barberia
           </h1>
         </div>
       </header>
@@ -47,13 +47,13 @@ export default function TurnosPage() {
         className="
           min-h-screen text-gray-100 flex flex-col items-center 
           p-6
-          pt-32    /* mobile: 8rem = 128px */
-          md:pt-28 /* tablet: 7rem */
-          lg:pt-24 /* desktop: 6rem */
+          pt-32       /* mobile: 128px */
+          md:pt-36    /* tablet: 144px */
+          lg:pt-40    /* desktop: 160px */
         "
         style={{ backgroundColor: "#0d0d12ff" }}
       >
-        
+
         <FormTurnoCliente onCrearTurno={crearTurno} />
 
 

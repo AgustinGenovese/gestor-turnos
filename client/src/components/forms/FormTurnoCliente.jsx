@@ -204,9 +204,10 @@ export function FormTurnoCliente({ onCrearTurno }) {
   return (
     <>
       <form
-        className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-2xl shadow-md"
+        className="flex flex-col gap-6 p-4 rounded-2xl shadow-md"
         style={{ backgroundColor: "#0d0d12ff", color: "black" }}
       >
+
         {/* 🔸 Paso 1: Datos del cliente */}
         {step === 1 && (
           <>
