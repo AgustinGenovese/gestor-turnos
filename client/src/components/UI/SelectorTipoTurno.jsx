@@ -11,10 +11,10 @@ export function SelectorTipoTurno({ tipos, onSelect, seleccionado }) {
 
   const categorias = Object.keys(grupos);
 
-  // 2. Estado: primera categoría abierta, el resto cerradas
+  // 2. Estado: todas las categorías cerradas
   const [abierto, setAbierto] = useState(
-    categorias.reduce((acc, cat, i) => {
-      acc[cat] = i === 0; // solo la primera categoría abierta
+    categorias.reduce((acc, cat) => {
+      acc[cat] = false; // todas cerradas
       return acc;
     }, {})
   );
@@ -39,9 +39,8 @@ export function SelectorTipoTurno({ tipos, onSelect, seleccionado }) {
             </h2>
 
             <span
-              className={`transition-transform text-white ${
-                abierto[categoria] ? "rotate-180" : "rotate-0"
-              }`}
+              className={`transition-transform text-white ${abierto[categoria] ? "rotate-180" : "rotate-0"
+                }`}
             >
               ▼
             </span>
@@ -60,11 +59,10 @@ export function SelectorTipoTurno({ tipos, onSelect, seleccionado }) {
                   key={tipo._id}
                   onClick={() => onSelect(tipo)}
                   type="button"
-                  className={`p-3 rounded-lg border text-left shadow-sm transition-all
-                    ${
-                      activo
-                        ? "border-[#c2a255] bg-[#c2a255]/10 shadow-md text-white"
-                        : "border-gray-700 hover:border-[#c2a255]/50"
+                  className={`p-2 rounded-lg border text-left shadow-sm transition-all
+                    ${activo
+                      ? "border-[#c2a255] bg-[#c2a255]/10 shadow-md text-white"
+                      : "border-gray-700 hover:border-[#c2a255]/50"
                     }
                   `}
                 >

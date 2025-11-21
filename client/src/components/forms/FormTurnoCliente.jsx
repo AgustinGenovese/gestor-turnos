@@ -204,7 +204,7 @@ export function FormTurnoCliente({ onCrearTurno }) {
   return (
     <>
       <form
-        className="flex flex-col gap-6 p-4 rounded-2xl shadow-md"
+        className="flex flex-col w-full gap-6 px-0 py-4 rounded-2xl shadow-md"
         style={{ backgroundColor: "#0d0d12ff", color: "black" }}
       >
 
@@ -266,7 +266,8 @@ export function FormTurnoCliente({ onCrearTurno }) {
               className="text-black"
             />
             <div className="md:col-span-2 flex justify-end">
-              <ButtonCliente onClick={handleNextStep}>Siguiente</ButtonCliente>
+              <div className="flex-1 min-w-[100px] px-3 py-2 text-sm"></div>
+              <ButtonCliente onClick={handleNextStep} className="flex-1 min-w-[100px] px-3 py-2 text-sm">Siguiente</ButtonCliente>
             </div>
           </>
         )}
@@ -275,9 +276,15 @@ export function FormTurnoCliente({ onCrearTurno }) {
         {step === 2 && (
           <>
             <div className="md:col-span-2">
-              <label className="block text-lg font-medium text-gray-100">
+              <label className="block text-lg font-semibold text-gray-100 mb-2">
                 Seleccione Tipo de Turno
               </label>
+              <span className="block text-sm font-medium text-gray-300 mt-1 leading-tight">
+                Puede seleccionar hasta dos opciones.
+              </span>
+              <span className="block text-sm mt-1 font-medium leading-tight text-[#ccac5c]">
+                En efectivo y transferencia tiene 10% de descuento!
+              </span>
             </div>
             <div className="md:col-span-2">
               <SelectorTipoTurno
