@@ -47,37 +47,15 @@ export default function TurnosPage() {
         className="
           min-h-screen text-gray-100 flex flex-col items-center 
           p-6
-          pt-48      /* mobile */
-          md:pt-40   /* tablet */
-          lg:pt-32   /* desktop */
+          pt-32    /* mobile: 8rem = 128px */
+          md:pt-28 /* tablet: 7rem */
+          lg:pt-24 /* desktop: 6rem */
         "
         style={{ backgroundColor: "#0d0d12ff" }}
       >
-        <div className="flex items-center space-x-2 text-base font-medium text-gray-300 mb-4">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-5 h-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M8 7V3m8 4V3M3 11h18M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-            />
-          </svg>
-          <span>Reserva tu turno fácilmente</span>
-        </div>
+        
+        <FormTurnoCliente onCrearTurno={crearTurno} />
 
-        {/* CARD DEL FORM */}
-        <div
-          className="w-full max-w-3xl bg-gray-800 rounded-2xl shadow-lg p-6 md:p-4 border-t-4"
-          style={{ backgroundColor: "#141418" }}
-        >
-          <FormTurnoCliente onCrearTurno={crearTurno} />
-        </div>
 
         {/* DECORACIÓN INFERIOR */}
         <div className="mt-12 w-full flex justify-center space-x-4 text-gray-600">
