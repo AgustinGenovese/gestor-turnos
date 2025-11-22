@@ -313,10 +313,8 @@ export function FormTurnoCliente({ onCrearTurno }) {
               <label className="block text-sm font-medium text-gray-300 mb-1">
                 Seleccione la fecha
               </label>
-              <div className="flex justify-center">
-                <div className="w-[320px] md:w-[360px]">
-                  ...
-
+              <div className="flex justify-center mb-4">
+                <div style={{ transform: "scale(1.15)", transformOrigin: "top center" }}>
                   <DatePicker
                     selected={fechaSeleccionada ? new Date(fechaSeleccionada + "T00:00") : null}
                     onChange={(date) => {
