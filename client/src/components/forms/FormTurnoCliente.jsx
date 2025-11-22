@@ -204,13 +204,39 @@ export function FormTurnoCliente({ onCrearTurno }) {
     setHorarioSeleccionado("");
   };
 
-
   return (
     <>
       <form
         className="flex flex-col w-full gap-6 px-0 py-4 rounded-2xl shadow-md"
         style={{ backgroundColor: "#0d0d12ff", color: "black" }}
       >
+        {/* 🔵 Barra de progreso */}
+        <div className="grid grid-cols-4 gap-2 mb-2">
+          {["Datos", "Servicio", "Fecha", "Horario"].map((nombre, index) => {
+            const numeroPaso = index + 1;
+            const activo = step >= numeroPaso;
+
+            return (
+              <div
+                key={index}
+                className={`
+          flex flex-col items-center p-2 rounded-lg text-xs font-medium
+          transition-all duration-300
+          ${activo ? "bg-[#c2a255] text-black" : "bg-gray-700 text-gray-300"}
+        `}
+              >
+                <div
+                  className={`w-6 h-6 flex items-center justify-center rounded-full mb-1 
+          ${activo ? "bg-black text-white" : "bg-gray-500 text-white"}`}
+                >
+                  {numeroPaso}
+                </div>
+                <span>{nombre}</span>
+              </div>
+            );
+          })}
+        </div>
+
 
         {/* 🔸 Paso 1: Datos del cliente */}
         {step === 1 && (
@@ -280,9 +306,6 @@ export function FormTurnoCliente({ onCrearTurno }) {
         {step === 2 && (
           <>
             <div className="md:col-span-2">
-              <label className="block text-lg font-semibold text-gray-100 mb-2">
-                Seleccione Tipo de Turno
-              </label>
               <span className="block text-sm font-medium text-gray-300 mt-1 leading-tight">
                 Puede seleccionar hasta dos opciones.
               </span>
@@ -314,10 +337,7 @@ export function FormTurnoCliente({ onCrearTurno }) {
         {step === 3 && (
           <>
             <div className="md:col-span-2 grid grid-cols-1 gap-3">
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Seleccione Fecha
-              </label>
-              <div className="flex justify-center mb-4">
+              <div className="flex justify-center mb-6">
                 <div style={{ transform: "scale(1.15)", transformOrigin: "top center" }}>
                   <DatePicker
                     selected={fechaSeleccionada ? new Date(fechaSeleccionada + "T00:00") : null}
