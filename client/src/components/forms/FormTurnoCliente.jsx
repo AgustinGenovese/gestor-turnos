@@ -313,27 +313,33 @@ export function FormTurnoCliente({ onCrearTurno }) {
               <label className="block text-sm font-medium text-gray-300 mb-1">
                 Seleccione la fecha
               </label>
-              <DatePicker
-                selected={fechaSeleccionada ? new Date(fechaSeleccionada + "T00:00") : null}
-                onChange={(date) => {
-                  if (!date) return;
-                  const yyyy = date.getFullYear();
-                  const mm = String(date.getMonth() + 1).padStart(2, "0");
-                  const dd = String(date.getDate()).padStart(2, "0");
-                  setFechaSeleccionada(`${yyyy}-${mm}-${dd}`);
-                }}
-                inline
-                minDate={new Date()} // Bloquea fechas pasadas
-                filterDate={(date) => {
-                  const day = date.getDay();
-                  return day !== 0 && day !== 1; // Bloquea domingos (0) y lunes (1)
-                }}
-                locale="es"
-                placeholderText="Selecciona una fecha"
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                dateFormat="yyyy-MM-dd"
-              />
+              <div className="flex justify-center">
+                <div className="w-[320px] md:w-[360px]">
+                  ...
+
+                  <DatePicker
+                    selected={fechaSeleccionada ? new Date(fechaSeleccionada + "T00:00") : null}
+                    onChange={(date) => {
+                      if (!date) return;
+                      const yyyy = date.getFullYear();
+                      const mm = String(date.getMonth() + 1).padStart(2, "0");
+                      const dd = String(date.getDate()).padStart(2, "0");
+                      setFechaSeleccionada(`${yyyy}-${mm}-${dd}`);
+                    }}
+                    inline
+                    minDate={new Date()} // Bloquea fechas pasadas
+                    filterDate={(date) => {
+                      const day = date.getDay();
+                      return day !== 0 && day !== 1; // Bloquea domingos (0) y lunes (1)
+                    }}
+                    locale="es"
+                    placeholderText="Selecciona una fecha"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    dateFormat="yyyy-MM-dd"
+                  />
+                </div>
+              </div>
 
               {fechaSeleccionada && franjasDisponibles.length > 0 ? (
                 <div>
