@@ -283,7 +283,7 @@ export function FormTurnoCliente({ onCrearTurno }) {
                 Puede seleccionar hasta dos opciones.
               </span>
               <span className="block text-sm mt-1 font-medium leading-tight text-[#ccac5c]">
-                En efectivo y transferencia tiene 10% de descuento!
+                ¡En efectivo y transferencia tiene 10% de descuento!
               </span>
             </div>
             <div className="md:col-span-2">
@@ -311,7 +311,7 @@ export function FormTurnoCliente({ onCrearTurno }) {
           <>
             <div className="md:col-span-2 grid grid-cols-1 gap-3">
               <label className="block text-sm font-medium text-gray-300 mb-1">
-                Fecha
+                Seleccione la fecha
               </label>
               <DatePicker
                 selected={fechaSeleccionada ? new Date(fechaSeleccionada + "T00:00") : null}
@@ -322,6 +322,7 @@ export function FormTurnoCliente({ onCrearTurno }) {
                   const dd = String(date.getDate()).padStart(2, "0");
                   setFechaSeleccionada(`${yyyy}-${mm}-${dd}`);
                 }}
+                inline
                 minDate={new Date()} // Bloquea fechas pasadas
                 filterDate={(date) => {
                   const day = date.getDay();
