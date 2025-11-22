@@ -146,6 +146,10 @@ export function FormTurnoCliente({ onCrearTurno }) {
       return toast.error("Selecciona un tipo de turno");
     }
 
+    if (step === 3 && !fechaSeleccionada) {
+      return toast.error("Selecciona una fecha antes de continuar");
+    }
+
     setStep(step + 1);
   };
 
@@ -306,12 +310,12 @@ export function FormTurnoCliente({ onCrearTurno }) {
           </>
         )}
 
-        {/* 🔸 Paso 3: Fecha, franja y horario */}
+        {/* 🔸 Paso 3: Fecha */}
         {step === 3 && (
           <>
             <div className="md:col-span-2 grid grid-cols-1 gap-3">
               <label className="block text-sm font-medium text-gray-300 mb-1">
-                Seleccione la fecha
+                Seleccione Fecha
               </label>
               <div className="flex justify-center mb-4">
                 <div style={{ transform: "scale(1.15)", transformOrigin: "top center" }}>
@@ -338,7 +342,23 @@ export function FormTurnoCliente({ onCrearTurno }) {
                   />
                 </div>
               </div>
+            </div>
+            <div className="md:col-span-2 flex justify-between gap-4 mt-4">
+              <ButtonCliente onClick={handlePrevStep} className="flex-1 min-w-[100px] px-3 py-2 text-sm">
+                Anterior
+              </ButtonCliente>
+              <ButtonCliente onClick={handleNextStep} className="flex-1 min-w-[100px] px-3 py-2 text-sm">
+                Siguiente
+              </ButtonCliente>
+            </div>
+          </>
+        )}
 
+        {/* 🔸 Paso 4: Franja y horario */}
+
+        {step === 4 && (
+          <>
+            <div className="md:col-span-2 grid grid-cols-1 gap-3">
               {fechaSeleccionada && franjasDisponibles.length > 0 ? (
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1">
@@ -365,29 +385,29 @@ export function FormTurnoCliente({ onCrearTurno }) {
                 </p></div>
 
               ) : null}
-            </div>
 
-            {franjaSeleccionada && horariosDisponibles.length > 0 ? (
-              <div className="col-span-2 grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
-                {horariosDisponibles.map((h) => (
-                  <button
-                    key={h}
-                    type="button"
-                    onClick={() => setHorarioSeleccionado(h)}
-                    className={`py-2 px-4 rounded-md text-white ${horarioSeleccionado === h
-                      ? "bg-[#c2a255]"
-                      : "bg-gray-700 hover:bg-gray-600"
-                      }`}
-                  >
-                    {h}
-                  </button>
-                ))}
-              </div>
-            ) : franjaSeleccionada ? (
-              <p className="text-red-600 mt-2 col-span-2">
-                No hay horarios disponibles para esta franja
-              </p>
-            ) : null}
+              {franjaSeleccionada && horariosDisponibles.length > 0 ? (
+                <div className="col-span-2 grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
+                  {horariosDisponibles.map((h) => (
+                    <button
+                      key={h}
+                      type="button"
+                      onClick={() => setHorarioSeleccionado(h)}
+                      className={`py-2 px-4 rounded-md text-white ${horarioSeleccionado === h
+                        ? "bg-[#c2a255]"
+                        : "bg-gray-700 hover:bg-gray-600"
+                        }`}
+                    >
+                      {h}
+                    </button>
+                  ))}
+                </div>
+              ) : franjaSeleccionada ? (
+                <p className="text-red-600 mt-2 col-span-2">
+                  No hay horarios disponibles para esta franja
+                </p>
+              ) : null}
+            </div>
 
             <div className="md:col-span-2 flex justify-between gap-4 mt-4">
               <ButtonCliente onClick={handlePrevStep} className="flex-1 min-w-[100px] px-3 py-2 text-sm">
