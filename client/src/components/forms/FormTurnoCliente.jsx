@@ -223,13 +223,20 @@ export function FormTurnoCliente({ onCrearTurno }) {
                 className={`
           py-2 text-sm font-semibold tracking-wide transition-all
           ${activo ? "text-[#c2a255]" : "text-gray-400"}
+          cursor-pointer
         `}
+                onClick={() => {
+                  if (numeroPaso < step) {
+                    setStep(numeroPaso); // SOLO PERMITE VOLVER ATRÁS
+                  }
+                }}
               >
                 {nombre}
               </span>
             );
           })}
         </div>
+
 
         {/* 🔸 Paso 1: Datos del cliente */}
         {step === 1 && (
