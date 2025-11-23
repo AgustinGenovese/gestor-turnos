@@ -59,7 +59,7 @@ export default function TurnosPage() {
         {/* DECORACIÓN INFERIOR */}
         <div className="mt-12 w-full flex justify-center space-x-4 text-gray-600">
           <a
-            href="https://www.google.com/maps"
+            href="https://www.google.com/maps/place/Sarkirian+Barberia/@-34.5768032,-58.4628421,17z/data=!3m1!4b1!4m6!3m5!1s0x95bcb5002b2d5a4d:0x214feb449b17c84b!8m2!3d-34.5768076!4d-58.4602672!16s%2Fg%2F11mm89rtvl?hl=es&entry=ttu&g_ep=EgoyMDI1MTExNy4wIKXMDSoASAFQAw%3D%3D"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-white transition"
