@@ -30,6 +30,8 @@ export function FormTurnoCliente({ onCrearTurno }) {
   const [horariosDisponibles, setHorariosDisponibles] = useState([]);
   const [horarioSeleccionado, setHorarioSeleccionado] = useState("");
 
+  const [mostrarResumen, setMostrarResumen] = useState(false);
+
   // 🔹 Fetch de tipos de turno
   useEffect(() => {
     const fetchTiposTurno = async () => {
@@ -159,7 +161,7 @@ export function FormTurnoCliente({ onCrearTurno }) {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault(); // <-- evita error cuando se llama sin evento
 
     if (!fechaSeleccionada) return toast.error("Selecciona una fecha");
     if (!franjaSeleccionada) return toast.error("Selecciona una franja horaria");
@@ -185,8 +187,9 @@ export function FormTurnoCliente({ onCrearTurno }) {
         </span>
       </div>,
       {
-        autoClose: 5000 // 5000ms = 5 segundos
-      });
+        autoClose: 5000,
+      }
+    );
 
     // Reset
     setStep(1);
@@ -434,8 +437,13 @@ export function FormTurnoCliente({ onCrearTurno }) {
                 Anterior
               </ButtonCliente>
               <ButtonCliente
-                type="submit"
-                onClick={handleSubmit}
+                type="button"
+                onClick={() => {
+                  if (!fechaSeleccionada) return toast.error("Selecciona una fecha");
+                  if (!franjaSeleccionada) return toast.error("Selecciona una franja horaria");
+                  if (!horarioSeleccionado) return toast.error("Selecciona un horario");
+                  setMostrarResumen(true);
+                }}
                 className="flex-1 min-w-[100px] px-3 py-2 text-sm"
               >
                 Confirmar
@@ -444,6 +452,62 @@ export function FormTurnoCliente({ onCrearTurno }) {
           </>
         )}
       </form>
+
+      {mostrarResumen && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex justify-center items-center z-50">
+          <div className="bg-[#0d0d12] w-full max-w-md p-6 rounded-2xl border border-gray-700 shadow-xl space-y-5">
+
+            <h2 className="text-xl font-semibold text-center text-[#c2a255]">
+              Confirmación del Turno
+            </h2>
+
+            <div className="space-y-3 text-gray-100">
+
+              <div>
+                <h3 className="text-sm text-gray-400">Cliente</h3>
+                <p>{datosCliente.nombre} {datosCliente.apellido}</p>
+                <p>{datosCliente.email}</p>
+                <p>{datosCliente.telefono}</p>
+              </div>
+
+              <div>
+                <h3 className="text-sm text-gray-400">Servicio</h3>
+                <p>{tiposTurno.find(t => t._id === datosCliente.tipoTurno)?.nombre}</p>
+              </div>
+
+              <div>
+                <h3 className="text-sm text-gray-400">Fecha</h3>
+                <p>{fechaSeleccionada}</p>
+              </div>
+
+              <div>
+                <h3 className="text-sm text-gray-400">Horario</h3>
+                <p>{horarioSeleccionado}</p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <button
+                onClick={() => setMostrarResumen(false)}
+                className="flex-1 py-2 rounded-xl border border-gray-600 text-gray-300 hover:bg-gray-700 transition-all"
+              >
+                Volver
+              </button>
+
+              <button
+                onClick={() => {
+                  setMostrarResumen(false);
+                  handleSubmit(); // 👉 enviar turno real
+                }}
+                className="flex-1 py-2 rounded-xl font-semibold text-black bg-[#c2a255] hover:bg-[#ccac5c] transition-all"
+              >
+                Confirmar
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
 
       {/* 🔹 Toast container */}
       <ToastContainer
