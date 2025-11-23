@@ -213,7 +213,7 @@ export function FormTurnoCliente({ onCrearTurno }) {
 
         {/* Barra de progreso minimalista solo texto */}
         <div className="grid grid-cols-4 gap-4 mb-2 text-center border-b border-gray-700 pb-2">
-          {["Datos", "Servicio", "Fecha", "Horario"].map((nombre, index) => {
+          {["Datos", "Servicios", "Fecha", "Horario"].map((nombre, index) => {
             const numeroPaso = index + 1;
             const activo = step === numeroPaso;
 
