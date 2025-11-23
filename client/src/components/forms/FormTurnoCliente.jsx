@@ -213,7 +213,7 @@ export function FormTurnoCliente({ onCrearTurno }) {
 
         {/* Barra de progreso minimalista solo texto */}
         <div className="grid grid-cols-4 gap-4 mb-2 text-center border-b border-gray-700 pb-2">
-          {["Datos", "Tipo", "Fecha", "Horario"].map((nombre, index) => {
+          {["Datos", "Servicio", "Fecha", "Horario"].map((nombre, index) => {
             const numeroPaso = index + 1;
             const activo = step === numeroPaso;
 
@@ -231,11 +231,10 @@ export function FormTurnoCliente({ onCrearTurno }) {
           })}
         </div>
 
-
         {/* 🔸 Paso 1: Datos del cliente */}
         {step === 1 && (
           <>
-            <div className="flex items-center space-x-2 text-base font-medium text-gray-300 mb-4">
+            <div className="flex items-center space-x-2 text-base font-medium text-gray-300 mb-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="w-5 h-5"
